@@ -83,19 +83,16 @@ class VmdSimpleProfile:
     def _get_bones_list(self, fp):
         self._seek(fp, "bone")
         bone_frame_num = self._get_frame_num(fp)
-        bones_names = []
-        bones_count = []
+        bones_list = {}   # type: dict[str, int]
         for _ in range(bone_frame_num):
             bone_name = self._get_bone_name(fp)
-            if bone_name not in bones_names:
-                bones_names.append(bone_name)
-                bones_count.append(1)
+            if bone_name not in bones_list:
+                bones_list[bone_name] = 1
             else:
-                bone_ind = bones_names.index(bone_name)
-                bones_count[bone_ind] += 1
+                bones_list[bone_name] += 1
             # skip binary data
             fp.seek(self._BONE_BIN_LEN, 1)
-        return bones_names, bones_count
+        return bones_list.keys(), bones_list.values()
 
     def _get_desired_bone_data(self, fp, required_bone_name, bone_count):
         data = VmdBoneData(required_bone_name, bone_count)
