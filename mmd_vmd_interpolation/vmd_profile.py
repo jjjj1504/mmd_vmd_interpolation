@@ -209,9 +209,20 @@ class VmdCameraData(VmdDataBase):
 
 class VmdBoneData(VmdDataBase):
 
-    def __init__(self, name, frame_num):
+    def __init__(self, name, frame_num=None):
         # type: (str, int) -> (None)
         self.name = name
+        self.frame_ids = []
+        self.positions = []
+        self.orientations = []
+        self.curve_x = []
+        self.curve_y = []
+        self.curve_z = []
+        self.curve_rot = []
+        if frame_num is not None:
+            self.allocate(frame_num)
+
+    def allocate(self, frame_num):
         self.frame_ids = np.zeros(frame_num)
         self.positions = np.zeros([frame_num, 3])
         self.orientations = self._gen_default_quaternion(frame_num)
@@ -219,3 +230,26 @@ class VmdBoneData(VmdDataBase):
         self.curve_y = self._gen_default_curve(frame_num)
         self.curve_z = self._gen_default_curve(frame_num)
         self.curve_rot = self._gen_default_curve(frame_num)
+
+    def append(self,
+        frame_id,
+        position,
+        orientation,
+        curve_x,
+        curve_y,
+        curve_z,
+        curve_rot,
+        ):
+        self.frame_ids.append(frame_id)
+        self.positions.append(position)
+        self.orientations.append(orientation)
+        self.curve_x.append(curve_x)
+        self.curve_y.append(curve_y)
+        self.curve_z.append(curve_z)
+        self.curve_rot.append(curve_rot)
+
+    def sort_frame(self):
+        for member_name, member_value in self.__dict__.items():
+            if isinstance(member_value, list):
+                setattr(self, member_name, np.array(member_value))
+        VmdDataBase.sort_frame(self)
