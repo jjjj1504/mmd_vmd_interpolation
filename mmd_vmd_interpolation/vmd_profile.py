@@ -75,10 +75,10 @@ class VmdSimpleProfile:
         return header_version_raw.split("\x00")[0]
 
     def _get_model_name(self, fp, header_version):
-        return fp.read(self._MODEL_NAME_LEN[header_version])
+        return fp.read(self._MODEL_NAME_LEN[header_version]).split("\x00")[0]
 
     def _get_bone_name(self, fp):
-        return fp.read(self._BONE_NAME_LEN)
+        return fp.read(self._BONE_NAME_LEN).split("\x00")[0]
 
     def _get_bones_list(self, fp):
         self._seek(fp, "bone")
