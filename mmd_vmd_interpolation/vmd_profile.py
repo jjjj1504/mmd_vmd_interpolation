@@ -94,27 +94,35 @@ class VmdSimpleProfile:
             fp.seek(self._BONE_BIN_LEN, 1)
         return bones_list.keys(), bones_list.values()
 
-    def _get_desired_bone_data(self, fp, required_bone_name, bone_count):
-        data = VmdBoneData(required_bone_name, bone_count)
+    def _get_desired_bones_data(self, fp, required_bones_names):
+        # initialize
+        data_dict = dict.fromkeys(required_bones_names)
+        for bone_name in required_bones_names:
+            data_dict[bone_name] = VmdBoneData(bone_name)
+        # seek required bones in bones data block
         self._seek(fp, "bone")
         bone_frame_num = self._get_frame_num(fp)
-        cnt = 0
         for _ in range(bone_frame_num):
             bone_name = self._get_bone_name(fp)
-            if bone_name != required_bone_name:
+            if bone_name not in data_dict:
+                # skip
                 fp.seek(self._BONE_BIN_LEN, 1)
             else:
+                # decode binary data to numerical data
                 raw = self._BONE_FORMAT.unpack(fp.read(self._BONE_BIN_LEN))
-                data.frame_ids[cnt] = raw[0]
-                data.positions[cnt] = raw[1:4]
-                data.orientations[cnt] = raw[4:8]
-                data.curve_x[cnt] = raw[ 8:24:4]
-                data.curve_y[cnt] = raw[24:40:4]
-                data.curve_z[cnt] = raw[40:56:4]
-                data.curve_rot[cnt] = raw[56::4]
-                cnt += 1
-        data.sort_frame()
-        return data
+                data_dict[bone_name].append(
+                    frame_id =raw[0],
+                    position = raw[1:4],
+                    orientation = raw[4:8],
+                    curve_x = raw[ 8:24:4],
+                    curve_y = raw[24:40:4],
+                    curve_z = raw[40:56:4],
+                    curve_rot = raw[56::4],
+                )
+        # reindex
+        for bone_name in required_bones_names:
+            data_dict[bone_name].sort_frame()
+        return data_dict
 
     def _get_camera_data(self, fp):
         self._seek(fp, "camera")
@@ -147,18 +155,9 @@ class VmdSimpleProfile:
         model_name = self.read_model_name()
         return model_name.startswith("ÉJÉÅÉâ")
 
-    def read_first_bone(self):
+    def read_desired_bones(self, desired_bones_names):
         with open(self.src, "rb") as fp:
-            bones_names, bones_count = self._get_bones_list(fp)
-            if len(bones_names) != 0:
-                # get first bone name
-                first_name = bones_names[0]
-                first_count = bones_count[0]
-            else:
-                # foolproof for empty data
-                first_name = ""
-                first_count = 0
-            bone_data = self._get_desired_bone_data(fp, first_name, first_count)
+            bone_data = self._get_desired_bones_data(fp, desired_bones_names)
             return bone_data
 
     def read_camera(self):
