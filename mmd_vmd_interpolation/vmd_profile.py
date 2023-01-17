@@ -172,6 +172,7 @@ class VmdSimpleProfile:
 class VmdDataBase(object):
 
     _CURVE_DEFAULT = np.array([20, 20, 107, 107])
+    _QUATERNION_DEFAULT = np.array([0., 0., 0., 1.])
 
     def sort_frame(self):
         # order of vmd frame data is along the order the registration instead of time
@@ -183,6 +184,9 @@ class VmdDataBase(object):
 
     def _gen_default_curve(self, frame_num):
         return np.tile(self._CURVE_DEFAULT, [frame_num, 1])
+
+    def _gen_default_quaternion(self, frame_num):
+        return np.tile(self._QUATERNION_DEFAULT, [frame_num, 1])
 
 
 class VmdCameraData(VmdDataBase):
@@ -210,7 +214,7 @@ class VmdBoneData(VmdDataBase):
         self.name = name
         self.frame_ids = np.zeros(frame_num)
         self.positions = np.zeros([frame_num, 3])
-        self.orientations = np.zeros([frame_num, 4])
+        self.orientations = self._gen_default_quaternion(frame_num)
         self.curve_x = self._gen_default_curve(frame_num)
         self.curve_y = self._gen_default_curve(frame_num)
         self.curve_z = self._gen_default_curve(frame_num)
