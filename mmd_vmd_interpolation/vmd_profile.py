@@ -71,8 +71,8 @@ class VmdSimpleProfile:
 
     def _get_header_version(self, fp):
         header_version_raw = fp.read(self._VERSION_LEN)
-        # ignore the string behind "\0"
-        return header_version_raw.split("\0")[0]
+        # ignore the string behind "\x00"
+        return header_version_raw.split("\x00")[0]
 
     def _get_model_name(self, fp, header_version):
         return fp.read(self._MODEL_NAME_LEN[header_version])
