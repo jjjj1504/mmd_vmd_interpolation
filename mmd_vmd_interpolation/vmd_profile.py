@@ -9,6 +9,7 @@ class VmdSimpleProfile:
     ## https://blog.csdn.net/haseetxwd/article/details/82821533
 
     _VERSION_LEN = 30
+    _NEW_VERSION_HEADER = "Vocaloid Motion Data 0002"
     _MODEL_NAME_LEN = {
         "Vocaloid Motion Data file" : 10,
         "Vocaloid Motion Data 0002" : 20,
@@ -20,6 +21,7 @@ class VmdSimpleProfile:
     _FRAME_NUM_LEN = 4
     _BONE_FORMAT = struct.Struct("I3f4f64b")
     _BONE_LEN = 15 + 4 + 3*4 + 4*4 + 64
+    _BONE_ATTR_NUM = 1 + 3 + 4 + 64
     _MORPH_FORMAT = struct.Struct("If")
     _MORPH_LEN = 15 + 4 + 4
     _CAMERA_FORMAT = struct.Struct("If3f3f24Bf?")
@@ -163,6 +165,34 @@ class VmdSimpleProfile:
     def read_camera(self):
         with open(self.src, "rb") as fp:
             return self._get_camera_data(fp)
+
+    @classmethod
+    def write_bones(cls, dst, model_name, bones_data):
+        with open(dst,"wb") as fp:
+            fp.write(cls._NEW_VERSION_HEADER.ljust(cls._VERSION_LEN,"\x00"))
+            fp.write(model_name.ljust(cls._MODEL_NAME_LEN[cls._NEW_VERSION_HEADER],"\x00"))
+            # bone
+            bones_frames_num = sum([len(b.frame_ids) for b in bones_data.values()])
+            fp.write(cls._FRAME_NUM_FORMAT.pack(bones_frames_num))
+            raw = [0] * cls._BONE_ATTR_NUM
+            for name, bone_data in bones_data.items():
+                name_raw = name.ljust(cls._BONE_NAME_LEN,"\x00")
+                for i in range(len(bone_data.frame_ids)):
+                    fp.write(name_raw)
+                    raw[0] = bone_data.frame_ids[i]
+                    raw[1:4] = bone_data.positions[i]
+                    raw[4:8] = bone_data.orientations[i]
+                    raw[ 8:24:4] = bone_data.curve_x[i]
+                    raw[24:40:4] = bone_data.curve_y[i]
+                    raw[40:56:4] = bone_data.curve_z[i]
+                    raw[56::4] = bone_data.curve_rot[i]
+                    fp.write(cls._BONE_FORMAT.pack(*raw))
+            # morph
+            fp.write(cls._FRAME_NUM_FORMAT.pack(0))
+            # camera
+            fp.write(cls._FRAME_NUM_FORMAT.pack(0))
+            # light
+            fp.write(cls._FRAME_NUM_FORMAT.pack(0))
 
 
 class VmdDataBase(object):
