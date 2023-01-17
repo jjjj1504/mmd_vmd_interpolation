@@ -148,8 +148,7 @@ class VmdSimpleProfile:
 
     def check_is_camera(self):
         model_name = self.read_model_name()
-        model_name_unicode = model_name.decode("shift_jis")
-        return model_name_unicode[:3] == u'ã‚«ãƒ¡ãƒ©'
+        return model_name.startswith("ƒJƒƒ‰")
 
     def read_first_bone(self):
         with open(self.src, "rb") as fp:
