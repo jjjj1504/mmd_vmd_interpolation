@@ -27,5 +27,22 @@ def main():
         return bones_dict
 
 
+def generate_nonrotatable_bones_data(src):
+
+    vp = VmdSimpleProfile(src)
+
+    if vp.check_is_camera():
+        print("Not bones data but camera data: " + src)
+        return
+
+    model_name = vp.read_model_name()
+    print("load bonse data from model: %s" % model_name)
+    desired_bones_names = ["全ての親","センター","グループ","腰","上半身","上半身2","首","頭","面"]
+    bones_dict = vp.read_desired_bones(desired_bones_names)
+    for bone_name in desired_bones_names:
+        bone_data = bones_dict[bone_name]
+        print("load %d frames of bone %s" % (len(bone_data.frame_ids), bone_data.name))
+
+
 if __name__ == "__main__":
     main()
