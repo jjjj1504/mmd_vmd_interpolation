@@ -71,12 +71,12 @@ class MMDCurveInterp(object):
     @classmethod
     def _solve_cubic_bezier_y_from_x(cls, cubic_bezier_coeffs, x):
         coeffs_to_solve = cubic_bezier_coeffs[0, :] - np.column_stack([np.zeros([len(x),3]), x])
-        t_sol = cls._solve_cubic_equation_real_root(coeffs_to_solve)
+        t_sol = cls._solve_cubic_equation_real_root_between_0_1(coeffs_to_solve)
         y = (t_sol.reshape(-1,1) ** range(4)[::-1]).dot(cubic_bezier_coeffs[1,:])
         return y
 
     @staticmethod
-    def _solve_cubic_equation_real_root(coeffs):
+    def _solve_cubic_equation_real_root_between_0_1(coeffs):
         a = coeffs[:, 0]
         b = coeffs[:, 1]
         c = coeffs[:, 2]
@@ -87,18 +87,15 @@ class MMDCurveInterp(object):
         q = d/a + 2*(b3a**3) - ca*b3a
         delta = q**2 + (4/27.0)*(p**3)
         # case discussion
-        y = np.zeros_like(delta, dtype="float")
+        sols = np.zeros_like(delta, dtype="float")
         mask = delta >= 0
         # case for single real root
         delta_sqrt_mask = np.sqrt(delta[mask])
         m_mask = np.cbrt(0.5*(-q[mask] + delta_sqrt_mask))
         n_mask = np.cbrt(0.5*(-q[mask] - delta_sqrt_mask))
-        y[mask] = m_mask + n_mask
-        # case for 3 real roots
+        sols[mask] = m_mask + n_mask - b3a[mask]
+        # case for 3 real roots (find the solution in interval 0~1)
         th0_imask = np.arctan2(np.sqrt(-delta[~mask]), -q[~mask])
-        y[~mask] = 2 * np.sqrt(-p[~mask]/3.0) * np.cos((th0_imask+4*np.pi)/3.0)
-        # final
-        sols = y - b3a
-        if ((sols > 1.0 + sys.float_info.epsilon) | (sols < 0.0 - sys.float_info.epsilon)).any():
-            print("hello")
+        sols_imask_candidate = ( 2. * np.sqrt(-p[~mask]/3.0) * np.cos((th0_imask+np.array([[0.,2.,4.]]).T*np.pi)/3.0) - b3a[~mask] ).T
+        sols[~mask] = sols_imask_candidate[(sols_imask_candidate >= 0.0) & (sols_imask_candidate <= 1.0)]
         return sols
