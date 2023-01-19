@@ -56,28 +56,26 @@ class BonesPoseCalculator(object):
             for i in range(len(bone_data.frame_ids)-1):
                 frame_id_endpoint = bone_data.frame_ids[i:i+2]
                 fid0, fid1 = frame_id_endpoint
-                if fid1 - fid0 > 1:
-                    # do data interpolation in frame fid0 ~ fid1-1
-                    frame_ids_desired = np.arange(fid0, fid1)
-                    position_interp = MMDCurveInterp.interp_position(
-                        frame_id_endpoint,
-                        bone_data.positions[i:i+2, :],
-                        [bone_data.curve_x[i+1,:], bone_data.curve_y[i+1,:], bone_data.curve_z[i+1,:]],
-                        frame_ids_desired,
-                    )
-                    orientation_interp = MMDCurveInterp.interp_quaternion(
-                        frame_id_endpoint,
-                        bone_data.orientations[i:i+2, :],
-                        bone_data.curve_rot[i+1,:],
-                        frame_ids_desired,
-                    )
-                else:
-                    # no need to do interpolation with single frame
-                    position_interp = bone_data.positions[i, :].reshape(1,-1)
-                    orientation_interp = bone_data.orientations[i, :].reshape(1,-1)
+                # start frame
+                bone_full_interp.positions[fid0, :] = bone_data.positions[i, :].reshape(1,-1)
+                bone_full_interp.orientations[fid0, :] = bone_data.orientations[i, :].reshape(1,-1)
+                # do data interpolation in frame fid0+1 ~ fid1-1
+                frame_ids_desired = np.arange(fid0+1, fid1)
+                position_interp = MMDCurveInterp.interp_position(
+                    frame_id_endpoint,
+                    bone_data.positions[i:i+2, :],
+                    [bone_data.curve_x[i+1,:], bone_data.curve_y[i+1,:], bone_data.curve_z[i+1,:]],
+                    frame_ids_desired,
+                )
+                orientation_interp = MMDCurveInterp.interp_quaternion(
+                    frame_id_endpoint,
+                    bone_data.orientations[i:i+2, :],
+                    bone_data.curve_rot[i+1,:],
+                    frame_ids_desired,
+                )
                 # record interval data
-                bone_full_interp.positions[fid0:fid1, :] = position_interp
-                bone_full_interp.orientations[fid0:fid1, :] = orientation_interp
+                bone_full_interp.positions[fid0+1:fid1, :] = position_interp
+                bone_full_interp.orientations[fid0+1:fid1, :] = orientation_interp
             # append the last frame
             if len(bone_data.frame_ids) > 1:
                 bone_full_interp.positions[-1, :] = bone_data.positions[i, :]
