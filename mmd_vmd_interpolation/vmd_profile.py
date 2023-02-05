@@ -27,6 +27,7 @@ class VmdSimpleProfile:
     _MORPH_LEN = 15 + 4 + 4
     _CAMERA_FORMAT = struct.Struct("If3f3f24Bf?")
     _CAMERA_LEN = 4 + 4 + 3*4 + 3*4 + 24 + 4 + 1
+    _CAMERA_ATTR_NUM = 1 + 1 + 3 + 3 + 24 + 1 + 1
     _LIGHT_FORMAT = struct.Struct("I3f3f")
     _LIGHT_LEN = 4 + 3*4 + 3*4
 
@@ -195,6 +196,40 @@ class VmdSimpleProfile:
             fp.write(cls._FRAME_NUM_FORMAT.pack(0))
             # camera
             fp.write(cls._FRAME_NUM_FORMAT.pack(0))
+            # light
+            fp.write(cls._FRAME_NUM_FORMAT.pack(0))
+
+    @classmethod
+    def write_camera(cls, dst, camera_data):
+        # type: (str, VmdCameraData) -> (None)
+        with open(dst,"wb") as fp:
+            # header
+            fp.write(cls._NEW_VERSION_HEADER.ljust(cls._VERSION_LEN,"\x00"))
+            # model name
+            model_name_len = cls._MODEL_NAME_LEN[cls._NEW_VERSION_HEADER]
+            fp.write(cls._CAMERA_HEADER_NAME.ljust(model_name_len,"\x00"))
+            # bone
+            fp.write(cls._FRAME_NUM_FORMAT.pack(0))
+            # morph
+            fp.write(cls._FRAME_NUM_FORMAT.pack(0))
+            # camera
+            frame_num = camera_data.get_frame_num()
+            fp.write(cls._FRAME_NUM_FORMAT.pack(frame_num))
+            raw = [0] * cls._CAMERA_ATTR_NUM
+            for i in range(frame_num):
+                raw[0] = camera_data.frame_ids[i]
+                raw[1] = camera_data.distances[i]
+                raw[2:5] = camera_data.positions[i]
+                raw[5:8] = camera_data.orientations[i]
+                raw[ 8:12] = camera_data.curve_x[i][[0,2,1,3]]
+                raw[12:16] = camera_data.curve_y[i][[0,2,1,3]]
+                raw[16:20] = camera_data.curve_z[i][[0,2,1,3]]
+                raw[20:24] = camera_data.curve_rot[i][[0,2,1,3]]
+                raw[24:28] = camera_data.curve_dis[i][[0,2,1,3]]
+                raw[28:32] = camera_data.curve_fov[i][[0,2,1,3]]
+                raw[32] = camera_data.fov_angles[i]
+                raw[33] = camera_data.perspective_flags[i]
+                fp.write(cls._CAMERA_FORMAT.pack(*raw))
             # light
             fp.write(cls._FRAME_NUM_FORMAT.pack(0))
 
