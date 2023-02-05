@@ -45,3 +45,17 @@ class Transform(object):
         sinth2 = np.sin(angle/2.)
         quaternion = np.stack([sinth2*axis[0], sinth2*axis[1], sinth2*axis[2], costh2])
         return quaternion
+
+    @classmethod
+    def rotate_vector(cls, q, v):
+        v4 = cls.extend_vector_to_quaternion(v)
+        qi = cls.inverse_quaternion(q)
+        qv4 = cls.product_quaternion(q, v4)
+        qv4qi = cls.product_quaternion(qv4, qi)
+        return qv4qi[:3]
+
+    @staticmethod
+    def extend_vector_to_quaternion(v):
+        zero_append = np.zeros_like(v[0])
+        v4 = np.stack([v[0], v[1], v[2], zero_append])
+        return v4
