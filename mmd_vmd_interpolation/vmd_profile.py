@@ -169,8 +169,11 @@ class VmdSimpleProfile:
     @classmethod
     def write_bones(cls, dst, model_name, bones_data):
         with open(dst,"wb") as fp:
+            # header
             fp.write(cls._NEW_VERSION_HEADER.ljust(cls._VERSION_LEN,"\x00"))
-            fp.write(model_name.ljust(cls._MODEL_NAME_LEN[cls._NEW_VERSION_HEADER],"\x00"))
+            # model name
+            model_name_len = cls._MODEL_NAME_LEN[cls._NEW_VERSION_HEADER]
+            fp.write(model_name.ljust(model_name_len,"\x00"))
             # bone
             bones_frames_num = sum([len(b.frame_ids) for b in bones_data.values()])
             fp.write(cls._FRAME_NUM_FORMAT.pack(bones_frames_num))
