@@ -7,7 +7,7 @@ class Transform(object):
     def product_quaternion(ql, qr):
         qlx, qly, qlz, qlw = ql
         qrx, qry, qrz, qrw = qr
-        q = np.row_stack([
+        q = np.stack([
             qlx*qrw + qlw*qrx + qly*qrz - qlz*qry,
             qly*qrw + qlw*qry + qlz*qrx - qlx*qrz,
             qlz*qrw + qlw*qrz + qlx*qry - qly*qrx,
@@ -36,5 +36,5 @@ class Transform(object):
     def form_quaternion(axis, angle):
         costh2 = np.cos(angle/2.)
         sinth2 = np.sin(angle/2.)
-        quaternion = np.row_stack([sinth2*axis, costh2])
+        quaternion = np.stack([sinth2*axis[0], sinth2*axis[1], sinth2*axis[2], costh2])
         return quaternion
