@@ -83,6 +83,44 @@ class BonesPoseCalculator(object):
         # record interpolated bone data
         self._bones_full_interp[bone_name] = bone_full_interp
         return self._bones_full_interp[bone_name]
-        
+
+    def get_full_pose_bones(self):
+        if self._bones_full_pose:
+            return self._bones_full_pose
+        # loop to do data interpolation for each bone
+        for name in self._bones_data.keys():
+            self._get_full_pose_bone(name)
+        return self._bones_full_pose
+
+    def _get_full_pose_bone(self, bone_name):
+        # get parent bone
+        if bone_name in self._bones_full_pose:
+            return self._bones_full_pose[bone_name]
+        # get parent bone
+        parent_name = self._bones_tree[bone_name]["parent"]
+        if parent_name is not None:
+            parent_full_pose = self._get_full_pose_bone(parent_name)
+        else:
+            # if no parent, just return itself
+            self._bones_full_pose[bone_name] = self._get_full_interp_bone(bone_name)
+            return self._bones_full_pose[bone_name]
+        # get relative translation
+        trans_from_parent = self._bones_tree[bone_name]["trans_from_parent"]
+        # get its bone data
+        bone_full_interp = self._get_full_interp_bone(bone_name)
+        # successsive transformation
+        full_frame_num = bone_full_interp.get_frame_num()
+        bone_full_pose = VmdBoneData(bone_name, full_frame_num)
+        bone_full_pose.frame_ids = bone_full_interp.frame_ids
+        full_orientations_T, full_positions_T = Transform.transform_pose(
+            parent_full_pose.orientations.T, parent_full_pose.positions.T,
+            bone_full_interp.orientations.T, (bone_full_interp.positions + trans_from_parent).T,
+        )
+        bone_full_pose.orientations = full_orientations_T.T
+        bone_full_pose.positions = full_positions_T.T
+        # record
+        self._bones_full_pose[bone_name] = bone_full_pose
+        return self._bones_full_pose[bone_name]
+
     def apply_lpf_to_trans(self):
         pass
