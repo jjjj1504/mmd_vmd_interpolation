@@ -211,6 +211,9 @@ class VmdDataBase(object):
             if type(member_value) is np.ndarray:
                 member_value[:] = member_value[sort_order]
 
+    def get_frame_num(self):
+        return len(self.frame_ids)
+
     def _gen_default_curve(self, frame_num):
         return np.tile(self._CURVE_DEFAULT, [frame_num, 1])
 
