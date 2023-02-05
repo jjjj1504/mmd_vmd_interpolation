@@ -122,5 +122,51 @@ class BonesPoseCalculator(object):
         self._bones_full_pose[bone_name] = bone_full_pose
         return self._bones_full_pose[bone_name]
 
-    def apply_lpf_to_trans(self):
-        pass
+    def get_lpf_full_positions_bones(self, time_delay):
+        if self._bones_full_position_lpf:
+            return self._bones_full_position_lpf
+        # loop to apply low-pass filter to position for each bone
+        for bone_name in self.get_full_pose_bones().keys():
+            self._get_lpf_full_positions_bone(bone_name, time_delay)
+        return self._bones_full_position_lpf
+
+    def _get_lpf_full_positions_bone(self, bone_name, time_delay):
+        if bone_name in self._bones_full_position_lpf:
+            return self._bones_full_position_lpf[bone_name]
+        bone_full_pose = self._get_full_pose_bone(bone_name)
+        bone_lpf = VmdBoneData(bone_name, bone_full_pose.get_frame_num())
+        bone_lpf.frame_ids = bone_full_pose.frame_ids
+        bone_lpf.positions = self._apply_lpf(bone_full_pose.positions, time_delay)
+        self._bones_full_position_lpf[bone_name] = bone_lpf
+        return self._bones_full_position_lpf[bone_name]
+
+    @staticmethod
+    def _apply_lpf(x, time_delay):
+        if time_delay == 0:
+            return x
+        else:
+            def lpf_by_for_loop(x, lag_ratio, update_ratio):
+                y = np.empty_like(x)
+                y[0] = x[0]
+                for i in range(1, len(x)):
+                    # 1-st order low-pass filter with backward difference approach
+                    y[i] = lag_ratio * y[i-1] + update_ratio * x[i]
+                return y
+
+            def lpf_by_scipy_lfilter(x, lag_ratio, update_ratio):
+                # apply digital filter
+                b = np.array([update_ratio])
+                a = np.array([1.0, -lag_ratio])
+                zi = scipy.signal.lfilter_zi(b, a)    # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.lfilter_zi.html
+                y, _ = scipy.signal.lfilter(b, a, x, axis=0, zi=zi*np.array([x[0]]))
+                return y
+
+            # low pass filter constant
+            dt = 1/30.0
+            time_constant = time_delay/2.5  # time delay is defined as the rise time for reaching about 90% of step input
+            pole_mag = 1.0/time_constant
+            lag_ratio = 1.0 / (1.0 + pole_mag*dt)
+            update_ratio = 1.0 - lag_ratio
+            # y = lpf_by_for_loop(x, lag_ratio, update_ratio)
+            y = lpf_by_scipy_lfilter(x, lag_ratio, update_ratio)
+            return y
