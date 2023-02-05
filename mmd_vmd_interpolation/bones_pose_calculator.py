@@ -42,7 +42,7 @@ class BonesPoseCalculator(object):
     def __init__(self, bones_data):
         self._bones_data = bones_data  # type: dict[str, VmdBoneData]
         self._bones_tree = BonesTree.get()
-        self._full_frame_num = max([b.frame_ids[-1] if len(b.frame_ids) else 0 for b in self._bones_data.values()])
+        self._full_frame_num = max([b.frame_ids[-1] if b.get_frame_num() else 0 for b in self._bones_data.values()])
         self._bones_full_interp = {}  # type: dict[str, VmdBoneData]
         self._bones_full_pose = {}  # type: dict[str, VmdBoneData]
         self._bones_full_position_lpf = {}  # type: dict[str, np.ndarray]
