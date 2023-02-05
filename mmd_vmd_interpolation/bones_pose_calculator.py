@@ -5,22 +5,9 @@ from vmd_profile import VmdBoneData
 
 
 class BonesTree(object):
-    _bones_list = [
-        ["全ての親", None, np.array([0.,0.,0.])],
-        ["センター", "全ての親", np.array([0.,0.,0.])],
-        ["グルーブ", "センター", np.array([0.,0.,0.])],
-        ["腰", "グルーブ", np.array([0.,0.,0.])],
-        ["上半身", "腰", np.array([0.,0.,0.])],
-        ["上半身2", "上半身", np.array([0.,0.,0.])],
-        ["首", "上半身2", np.array([0.,0.,0.])],
-        ["頭", "首", np.array([0.,0.,0.])],
-        ["面", "頭", np.array([0.,0.,0.])],
-    ]
 
     @classmethod
-    def get(cls, bones_list=None):
-        if bones_list is None:
-            bones_list = cls._bones_list
+    def get(cls, bones_list):
         bones_tree = {}
         # assign basic attribute
         for bone_name, parent_name, position in bones_list:
@@ -39,9 +26,9 @@ class BonesTree(object):
 
 class BonesPoseCalculator(object):
 
-    def __init__(self, bones_data):
+    def __init__(self, bones_data, bone_tree={}):
         self._bones_data = bones_data  # type: dict[str, VmdBoneData]
-        self._bones_tree = BonesTree.get()
+        self._bones_tree = bone_tree
         self._full_frame_num = max([b.frame_ids[-1] if b.get_frame_num() else 0 for b in self._bones_data.values()])
         self._bones_full_interp = {}  # type: dict[str, VmdBoneData]
         self._bones_full_pose = {}  # type: dict[str, VmdBoneData]
