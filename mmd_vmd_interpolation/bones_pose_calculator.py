@@ -38,61 +38,51 @@ class BonesPoseCalculator(object):
         if self._bones_full_interp:
             return self._bones_full_interp
         # loop to do data interpolation for each bone
-        for name, bone_data in self._bones_data.items():
-            bone_full_interp = VmdBoneData(name, self._full_frame_num)
-            bone_full_interp.frame_ids = np.arange(self._full_frame_num)
-            # loop to do data interpolation for each interval
-            for i in range(len(bone_data.frame_ids)-1):
-                frame_id_endpoint = bone_data.frame_ids[i:i+2]
-                fid0, fid1 = frame_id_endpoint
-                # start frame
-                bone_full_interp.positions[fid0, :] = bone_data.positions[i, :].reshape(1,-1)
-                bone_full_interp.orientations[fid0, :] = bone_data.orientations[i, :].reshape(1,-1)
-                # do data interpolation in frame fid0+1 ~ fid1-1
-                frame_ids_desired = np.arange(fid0+1, fid1)
-                position_interp = MMDCurveInterp.interp_position(
-                    frame_id_endpoint,
-                    bone_data.positions[i:i+2, :],
-                    [bone_data.curve_x[i+1,:], bone_data.curve_y[i+1,:], bone_data.curve_z[i+1,:]],
-                    frame_ids_desired,
-                )
-                orientation_interp = MMDCurveInterp.interp_quaternion(
-                    frame_id_endpoint,
-                    bone_data.orientations[i:i+2, :],
-                    bone_data.curve_rot[i+1,:],
-                    frame_ids_desired,
-                )
-                # record interval data
-                bone_full_interp.positions[fid0+1:fid1, :] = position_interp
-                bone_full_interp.orientations[fid0+1:fid1, :] = orientation_interp
-            # append the last frame
-            if len(bone_data.frame_ids) > 1:
-                bone_full_interp.positions[-1, :] = bone_data.positions[i, :]
-                bone_full_interp.orientations[-1, :] = bone_data.orientations[i, :]
-            elif len(bone_data.frame_ids) == 1:
-                bone_full_interp.positions[:] = bone_data.positions[0, :]
-                bone_full_interp.orientations[:] = bone_data.orientations[0, :]
-            # record interpolated bone data
-            self._bones_full_interp[name] = bone_full_interp
-        # end of loop for doing data interpolation for each bone 
+        for name in self._bones_data.keys():
+            self._get_full_interp_bone(name)
         return self._bones_full_interp
 
-    def _gen_full_interp_bone(self, bone_name):
-        # get parent bone
-        parent_name = self._bones_tree[bone_name]["parent"]
-        if parent_name is not None:
-            if parent_name not in self._bones_full_interp:
-                self._gen_full_interp_bone(parent_name)
-            parent_bone = self._bones_full_interp[parent_name]
+    def _get_full_interp_bone(self, bone_name):
+        if bone_name in self._bones_full_interp:
+            return self._bones_full_interp[bone_name]
+        bone_data = self._bones_data[bone_name]
+        bone_full_interp = VmdBoneData(bone_name, self._full_frame_num)
+        bone_full_interp.frame_ids = np.arange(self._full_frame_num)
+        # loop to do data interpolation for each interval
+        for i in range(bone_data.get_frame_num()-1):
+            frame_id_endpoint = bone_data.frame_ids[i:i+2]
+            fid0, fid1 = frame_id_endpoint
+            # do data interpolation in frame fid0 ~ fid1-1
+            frame_ids_desired = np.arange(fid0, fid1)
+            position_interp = MMDCurveInterp.interp_position(
+                frame_id_endpoint,
+                bone_data.positions[i:i+2, :],
+                [bone_data.curve_x[i+1,:], bone_data.curve_y[i+1,:], bone_data.curve_z[i+1,:]],
+                frame_ids_desired,
+            )
+            orientation_interp = MMDCurveInterp.interp_quaternion(
+                frame_id_endpoint,
+                bone_data.orientations[i:i+2, :],
+                bone_data.curve_rot[i+1,:],
+                frame_ids_desired,
+            )
+            # record interval data
+            bone_full_interp.positions[fid0:fid1, :] = position_interp
+            bone_full_interp.orientations[fid0:fid1, :] = orientation_interp
+        # append the last frame
+        if bone_data.get_frame_num() > 1:
+            bone_full_interp.positions[-1, :] = bone_data.positions[-1, :]
+            bone_full_interp.orientations[-1, :] = bone_data.orientations[-1, :]
+        # padding constant data for single frame
+        elif bone_data.get_frame_num() == 1:
+            bone_full_interp.positions[:] = bone_data.positions[0, :]
+            bone_full_interp.orientations[:] = bone_data.orientations[0, :]
+        # remain default value if 0 frame
         else:
-            parent_bone = None
-        # 
-
-
-        for bone_name in self._bones_data.keys():
-            full_bone = VmdBoneData(bone_name, full_frame_num)
-            full_bone.frame_ids = np.arange(full_frame_num)
-            self._bones_full_interp[bone_name] = full_bone
+            pass
+        # record interpolated bone data
+        self._bones_full_interp[bone_name] = bone_full_interp
+        return self._bones_full_interp[bone_name]
         
     def apply_lpf_to_trans(self):
         pass
