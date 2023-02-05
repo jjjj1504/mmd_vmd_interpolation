@@ -14,6 +14,7 @@ class VmdSimpleProfile:
         "Vocaloid Motion Data file" : 10,
         "Vocaloid Motion Data 0002" : 20,
     }
+    _CAMERA_HEADER_NAME = "ÉJÉÅÉâÅEè∆ñæ"
 
     ## struct usage
     ## https://docs.python.org/3/library/struct.html
@@ -155,7 +156,7 @@ class VmdSimpleProfile:
 
     def check_is_camera(self):
         model_name = self.read_model_name()
-        return model_name.startswith("ÉJÉÅÉâ")
+        return model_name.startswith(self._CAMERA_HEADER_NAME)
 
     def read_desired_bones(self, desired_bones_names):
         with open(self.src, "rb") as fp:
