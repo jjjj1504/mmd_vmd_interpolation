@@ -275,7 +275,9 @@ class VmdBoneData(VmdDataBase):
         self.curve_rot.append(curve_rot)
 
     def sort_frame(self):
+        # convert list to numpy array
         for member_name, member_value in self.__dict__.items():
             if isinstance(member_value, list):
                 setattr(self, member_name, np.array(member_value))
+        # sort numpy array along frame_ids
         VmdDataBase.sort_frame(self)
