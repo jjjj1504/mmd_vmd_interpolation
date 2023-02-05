@@ -47,6 +47,12 @@ class Transform(object):
         return quaternion
 
     @classmethod
+    def transform_pose(cls, q1, t1, q2, t2):
+        q12 = cls.product_quaternion(q1, q2)
+        t12 = cls.rotate_vector(q1, t2) + t1
+        return q12, t12
+
+    @classmethod
     def rotate_vector(cls, q, v):
         v4 = cls.extend_vector_to_quaternion(v)
         qi = cls.inverse_quaternion(q)
