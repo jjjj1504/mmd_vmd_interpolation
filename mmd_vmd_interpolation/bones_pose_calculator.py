@@ -22,12 +22,14 @@ class BonesTree(object):
         if bones_list is None:
             bones_list = cls._bones_list
         bones_tree = {}
+        # assign basic attribute
         for bone_name, parent_name, position in bones_list:
             bones_tree[bone_name] = {
                 "parent": parent_name,
                 "position": position,
                 "trans_from_parent": None,
             }
+        # get translation from parent bone
         for bone_name, bone_info in bones_tree.items():
             if bone_info["parent"] is not None:
                 bone_info["trans_from_parent"] = \
