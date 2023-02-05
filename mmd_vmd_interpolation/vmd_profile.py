@@ -219,7 +219,7 @@ class VmdCameraData(VmdDataBase):
 
     def __init__(self, frame_num):
         # type: (int) -> (None)
-        self.frame_ids = np.zeros(frame_num)
+        self.frame_ids = np.zeros(frame_num, dtype="int")
         self.distances = np.zeros(frame_num)
         self.positions = np.zeros([frame_num, 3])
         self.orientations = np.zeros([frame_num, 3])
@@ -249,7 +249,7 @@ class VmdBoneData(VmdDataBase):
             self.allocate(frame_num)
 
     def allocate(self, frame_num):
-        self.frame_ids = np.zeros(frame_num)
+        self.frame_ids = np.zeros(frame_num, dtype="int")
         self.positions = np.zeros([frame_num, 3])
         self.orientations = self._gen_default_quaternion(frame_num)
         self.curve_x = self._gen_default_curve(frame_num)
