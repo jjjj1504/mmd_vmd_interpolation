@@ -230,7 +230,7 @@ class VmdCameraData(VmdDataBase):
         self.curve_dis = self._gen_default_curve(frame_num)
         self.curve_fov = self._gen_default_curve(frame_num)
         self.fov_angles = np.zeros([frame_num])
-        self.perspective_flags = np.zeros(frame_num, "bool")
+        self.perspective_flags = np.ones(frame_num, "bool")
 
 
 class VmdBoneData(VmdDataBase):
