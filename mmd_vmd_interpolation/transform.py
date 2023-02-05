@@ -15,9 +15,16 @@ class Transform(object):
         ])
         return q
 
+    @staticmethod
+    def inverse_quaternion(q):
+        q_inv = np.empty_like(q)
+        q_inv[:3] = -q[:3]
+        q_inv[3] = q[3]
+        return q_inv
+
     @classmethod
     def divide_left_quaternion(cls, ql, qr):
-        ql_inv = ql * np.array([-1.,-1.,-1., 1.])
+        ql_inv = cls.inverse_quaternion(ql)
         q = cls.product_quaternion(ql_inv, qr)
         return q
 
