@@ -20,7 +20,7 @@ def generate_nonrotatable_bones_data(src, dst, motion_time_delay=0.0):
         return
 
     # setting
-    desired_bones_names = ["全ての親","センター","グルーブ","腰","上半身","上半身2","首","頭","面"]
+    desired_bones_names = ["全ての親","センター","グルーブ","腰","上半身","上半身2","首","頭","面","右肩P","右肩","右腕","左肩P","左肩","左腕"]
     bones_tree = BonesTree.get([
         ["全ての親", None, np.array([0., 0., 0.])],
         ["センター", "全ての親", np.array([0., 8., 0.])],
@@ -31,6 +31,12 @@ def generate_nonrotatable_bones_data(src, dst, motion_time_delay=0.0):
         ["首", "上半身2", np.array([0., 16.34, -0.11])],
         ["頭", "首", np.array([0., 17.2, -0.12])],
         ["面", "頭", np.array([0., 17.8, -1.0])],
+        ["右肩P", "上半身2", np.array([-0.235, 16.06, -0.15])],
+        ["右肩", "右肩P", np.array([-0.235, 16.06, -0.15])],
+        ["右腕", "右肩", np.array([-1.1, 15.8, -0.13])],
+        ["左肩P", "上半身2", np.array([0.235, 16.06, -0.15])],
+        ["左肩", "左肩P", np.array([0.235, 16.06, -0.15])],
+        ["左腕", "左肩", np.array([1.1, 15.8, -0.13])],
     ])
     bones_name_remap = {
         "全ての親":"parent of all",
@@ -41,7 +47,11 @@ def generate_nonrotatable_bones_data(src, dst, motion_time_delay=0.0):
         "上半身2":"upper body 2",
         "首":"neck",
         "頭":"head",
-        "面":"face"
+        "面":"face",
+        "右肩": "right shoulder",
+        "右腕": "right arm",
+        "左肩": "left shoulder",
+        "左腕": "left arm",
     }
     dst_model_name = "nonrotatable_bone"
 
