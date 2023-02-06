@@ -9,6 +9,24 @@ class MMDCurveInterp(object):
 
     @classmethod
     def interp(cls, frame_id_endpoint, value_endpoint, curve_param, frame_ids_desired):
+        # output allocation
+        if value_endpoint.ndim == 1:
+            values = np.zeros_like(frame_ids_desired, dtype="float")
+        else:
+            values = np.zeros([len(frame_ids_desired), value_endpoint.shape[1]])
+        # prevent start point
+        mask_0 = frame_ids_desired == frame_id_endpoint[0]
+        values[mask_0] = value_endpoint[0]
+        # prevent end point
+        mask_1 = frame_ids_desired == frame_id_endpoint[1]
+        values[mask_1] = value_endpoint[1]
+        # do the interpolation without endpoints
+        mask = ~mask_0 & ~mask_1
+        values[mask] = cls._interp_withou_prevent_endpoint(frame_id_endpoint, value_endpoint, curve_param, frame_ids_desired[mask])
+        return values
+
+    @classmethod
+    def _interp_withou_prevent_endpoint(cls, frame_id_endpoint, value_endpoint, curve_param, frame_ids_desired):
         # needn't do interpolation for flat data
         if (value_endpoint[1] == value_endpoint[0]).all():
             if value_endpoint.ndim == 1:
