@@ -25,7 +25,7 @@ class VmdSimpleProfile:
     _BONE_ATTR_NUM = 1 + 3 + 4 + 64
     _MORPH_FORMAT = struct.Struct("If")
     _MORPH_LEN = 15 + 4 + 4
-    _CAMERA_FORMAT = struct.Struct("If3f3f24Bf?")
+    _CAMERA_FORMAT = struct.Struct("If3f3f24BI?")
     _CAMERA_LEN = 4 + 4 + 3*4 + 3*4 + 24 + 4 + 1
     _CAMERA_ATTR_NUM = 1 + 1 + 3 + 3 + 24 + 1 + 1
     _LIGHT_FORMAT = struct.Struct("I3f3f")
@@ -144,7 +144,7 @@ class VmdSimpleProfile:
             data.curve_rot[i][[0,2,1,3]] = raw[20:24]
             data.curve_dis[i][[0,2,1,3]] = raw[24:28]
             data.curve_fov[i][[0,2,1,3]] = raw[28:32]
-            data.fov_angles[i] = raw[32]
+            data.fov_angles[i] = float(raw[32])
             data.perspective_flags[i] = raw[33]
         data.sort_frame()
         return data
@@ -227,7 +227,7 @@ class VmdSimpleProfile:
                 raw[20:24] = camera_data.curve_rot[i][[0,2,1,3]]
                 raw[24:28] = camera_data.curve_dis[i][[0,2,1,3]]
                 raw[28:32] = camera_data.curve_fov[i][[0,2,1,3]]
-                raw[32] = camera_data.fov_angles[i]
+                raw[32] = int(camera_data.fov_angles[i])
                 raw[33] = camera_data.perspective_flags[i]
                 fp.write(cls._CAMERA_FORMAT.pack(*raw))
             # light
