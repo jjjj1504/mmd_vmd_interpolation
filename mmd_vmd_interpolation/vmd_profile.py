@@ -250,11 +250,13 @@ class VmdDataBase(object):
     def get_frame_num(self):
         return len(self.frame_ids)
 
-    def _gen_default_curve(self, frame_num):
-        return np.tile(self._CURVE_DEFAULT, [frame_num, 1])
+    @classmethod
+    def _gen_default_curve(cls, frame_num):
+        return np.tile(cls._CURVE_DEFAULT, [frame_num, 1])
 
-    def _gen_default_quaternion(self, frame_num):
-        return np.tile(self._QUATERNION_DEFAULT, [frame_num, 1])
+    @classmethod
+    def _gen_default_quaternion(cls, frame_num):
+        return np.tile(cls._QUATERNION_DEFAULT, [frame_num, 1])
 
 
 class VmdCameraData(VmdDataBase):
