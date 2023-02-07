@@ -53,8 +53,9 @@ def generate_bone_tracing_camera_data(
         print("calculate camera tracing bone...")
         camera_interp.positions = CameraTracer.trace_bone(camera_interp, bone_data)
 
-    print("add cammera shake...")
-    camera_interp.positions = CameraTracer.add_camera_shake(camera_interp, camera_shake_interval, camera_shake_amplitude)
+    if camera_shake_interval > 0. and camera_shake_amplitude > 0.:
+        print("add cammera shake...")
+        camera_interp.positions = CameraTracer.add_camera_shake(camera_interp, camera_shake_interval, camera_shake_amplitude)
 
     # write to file
     print("exporting camera data to file: %s ..." % dst_camera)
