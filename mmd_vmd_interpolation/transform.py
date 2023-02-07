@@ -69,7 +69,7 @@ class Transform(object):
     @classmethod
     def convert_mmd_euler_angles_to_quaternion(cls, mmd_euler_angles):
         mmd_x_pitch, mmd_y_yaw, mmd_z_roll = mmd_euler_angles
-        q_x_pitch = cls.form_quaternion(np.array([[1.,  0.,  0.]]).T, mmd_x_pitch)
+        q_x_pitch = cls.form_quaternion(np.array([[-1.,  0.,  0.]]).T, mmd_x_pitch)   # attention: in reverse
         q_y_yaw   = cls.form_quaternion(np.array([[0., -1.,  0.]]).T, mmd_y_yaw)   # attention: in reverse
         q_z_roll  = cls.form_quaternion(np.array([[0.,  0., -1.]]).T, mmd_z_roll)   # attention: in reverse
         q_yp = cls.product_quaternion(q_y_yaw, q_x_pitch)
