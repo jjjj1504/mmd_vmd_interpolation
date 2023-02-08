@@ -8,12 +8,13 @@ from vmd_profile import VmdCameraData
 
 class CameraSmoother(object):
 
-    def __init__(self, camera_data):
+    def __init__(self, camera_data, interp_frame_interval=2):
         self._camera_data = camera_data  # type: VmdCameraData
         self._interp_fram_ids = np.zeros(0, dtype="int")
         self._interp_frame_loc = np.zeros(0, dtype="int")
         self._seg_frame_loc = np.zeros(0, dtype="int")
         self._seg_frame_interp_loc = np.zeros(0, dtype="int")
+        self._interp_frame_interval = interp_frame_interval
         self._determine_interp_frame_num()
         self._camera_data_interp = VmdCameraData(len(self._interp_fram_ids))
         self._camera_data_interp.frame_ids = self._interp_fram_ids
@@ -26,7 +27,11 @@ class CameraSmoother(object):
         seg_frame_interp_num = 0
         for i in range(self._camera_data.get_frame_num()-1):
             fid0, fid1 = self._camera_data.frame_ids[i:i+2]
-            interp_frame_id = np.arange(fid0, max(fid0+1, fid1-1), 2)
+            if self._camera_data.fov_angles[i] == self._camera_data.fov_angles[i+1]:
+                interp_frame_interval = self._interp_frame_interval
+            else:
+                interp_frame_interval = 1
+            interp_frame_id = np.arange(fid0, max(fid0+1, fid1-1), interp_frame_interval)
             interp_frame_num = len(interp_frame_id)
             interp_frame_ids.append(interp_frame_id)
             interp_frame_loc.append(interp_frame_loc[-1] + interp_frame_num)
