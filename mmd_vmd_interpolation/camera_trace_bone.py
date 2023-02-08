@@ -162,8 +162,8 @@ class CameraSmoother(object):
             plt.show()
 
         plot(
-            self._camera_data.positions[:,0],
-            self._camera_data_interp.positions[:,0]
+            self._camera_data.orientations[:,0],
+            self._camera_data_interp.orientations[:,0]
         )
 
 
