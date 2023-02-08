@@ -116,7 +116,7 @@ class CameraSmoother(object):
                         values = values[loc0:loc1],
                         frame_ids_desired = interp_fram_ids[interp_loc0:interp_loc1],
                     )
-                else:
+                elif loc1 - loc0 == 2:
                     # do data interpolation (exclude start frame for boundary precision issue)
                     values_interp[interp_loc0:interp_loc1] = MMDCurveInterp.interp(
                         frame_id_endpoint = frame_ids[loc0: loc1],
@@ -124,6 +124,10 @@ class CameraSmoother(object):
                         curve_param = curves[loc0+1],
                         frame_ids_desired = interp_fram_ids[interp_loc0:interp_loc1],
                     )
+                elif loc1 - loc0 == 1:
+                    values_interp[interp_loc0] = values[loc0]
+                else:
+                    raise Exception("what?")
         # padding constant data for single frame
         elif self._camera_data.get_frame_num() == 1:
             values_interp[:] = values[0]
