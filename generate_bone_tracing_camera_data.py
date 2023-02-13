@@ -1,5 +1,9 @@
 from mmd_vmd_interpolation.vmd_profile import VmdSimpleProfile
 from mmd_vmd_interpolation.bones_pose_calculator import BonesPoseCalculator
+from mmd_vmd_interpolation.camera_trace_bone import (
+    CameraSmoother,
+    CameraTracer,
+)
 
 
 def main():
