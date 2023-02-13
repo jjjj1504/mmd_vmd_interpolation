@@ -70,10 +70,14 @@ class CameraSmoother(object):
         # fov
         if need_smooth_fov_angles:
             self._interp_smooth(self._camera_data.fov_angles, self._camera_data.curve_fov, self._camera_data_interp.fov_angles)
+            mask = np.ones(len(self._camera_data_interp.get_frame_num()), dtype="bool")
         else:
             self._interp_default(self._camera_data.fov_angles, self._camera_data.curve_fov, self._camera_data_interp.fov_angles)
+            mask = self._get_various_mask_for_default(self._camera_data.fov_angles, self._camera_data_interp.fov_angles)
         # perspective
         self._interp_constant(self._camera_data.perspective_flags, self._camera_data_interp.perspective_flags)
+        # apply mask
+        self._camera_data_interp.apply_mask(mask)
         # return
         return self._camera_data_interp
 
@@ -165,6 +169,35 @@ class CameraSmoother(object):
             self._camera_data.orientations[:,0],
             self._camera_data_interp.orientations[:,0]
         )
+
+    def _get_various_mask_for_default(self, values, values_interp):
+        if self._camera_data.get_frame_num() > 1:
+            frame_ids = self._camera_data.frame_ids
+            interp_fram_ids = self._interp_fram_ids
+            mask = np.zeros(len(values_interp), dtype="bool")
+            for i in range(self._camera_data.get_frame_num()-1):
+                loc0, loc1 = self._interp_frame_loc[i:i+2]
+                if values[i] == values[i+1]:
+                    mask[loc0:loc1+1] = True
+                else:
+                    # extraxt section
+                    values_interp_section = values_interp[loc0:loc1+1]
+                    mask_section = mask[loc0:loc1+1]
+                    # middle frames
+                    values_section_diff = np.append(np.append(0, np.where(np.diff(np.round(values_interp_section)))[0]+1), len(values_interp_section))
+                    values_section_diff_endpoints = np.row_stack([values_section_diff[:-1], values_section_diff[1:]])
+                    diff_ind = np.round( 0.5*(values_section_diff_endpoints[0,:] + values_section_diff_endpoints[1,:]+1) ).astype("int")
+                    mask_section[diff_ind[1:-1]] = True
+                    # endpoints frame
+                    mask_section[0] = True
+                    mask_section[-1] = True
+            return mask
+        # padding constant data for single frame
+        elif self._camera_data.get_frame_num() == 1:
+            return np.zeros(len(values_interp), dtype="bool")
+        # remain default value if 0 frame
+        else:
+            return np.array([])
 
 
 class CameraTracer(object):
