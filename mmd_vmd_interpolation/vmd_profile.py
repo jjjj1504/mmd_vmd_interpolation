@@ -258,6 +258,11 @@ class VmdDataBase(object):
     def _gen_default_quaternion(cls, frame_num):
         return np.tile(cls._QUATERNION_DEFAULT, [frame_num, 1])
 
+    def apply_mask(self, mask):
+        for member_name, member_value in self.__dict__.items():
+            if type(member_value) is np.ndarray:
+                setattr(self, member_name, member_value[mask])
+
 
 class VmdCameraData(VmdDataBase):
 
