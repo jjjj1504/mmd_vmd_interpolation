@@ -243,10 +243,9 @@ class CameraTracer(object):
         interval_num = np.ceil(end_frame_id / frame_per_interval) + 1
         shake_frame_ids = np.arange(interval_num) * frame_per_interval
         # generate random shake points from polar coordinate system
-        shake_angles = 2.0 * np.pi * np.random.rand(len(shake_frame_ids))
         mmd_length_unit_per_meter = 1.0 / 0.08
-        shake_radii = (camera_shake_amplitude * mmd_length_unit_per_meter) * np.random.rand(len(shake_frame_ids))
-        shake_points = shake_radii[:, np.newaxis] * np.column_stack([np.cos(shake_angles), np.sin(shake_angles)])
+        camera_shake_amplitude_std = camera_shake_amplitude / 3.0
+        shake_points = (camera_shake_amplitude_std * mmd_length_unit_per_meter) * np.random.randn(len(shake_frame_ids), 2)
         # smooth
         shake_motion = SmoothInterp.interp(shake_frame_ids, shake_points, frame_ids)
         return shake_motion
