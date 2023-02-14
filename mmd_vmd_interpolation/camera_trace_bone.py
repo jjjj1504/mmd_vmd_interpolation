@@ -247,7 +247,7 @@ class CameraTracer(object):
         mmd_length_unit_per_meter = 1.0 / 0.08
         shake_radii = (camera_shake_amplitude * mmd_length_unit_per_meter) * np.random.rand(len(shake_frame_ids))
         shake_points = shake_radii[:, np.newaxis] * np.column_stack([np.cos(shake_angles), np.sin(shake_angles)])
-        # smoo
+        # smooth
         shake_motion = SmoothInterp.interp(shake_frame_ids, shake_points, frame_ids)
         return shake_motion
 
