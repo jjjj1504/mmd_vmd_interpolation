@@ -1,3 +1,4 @@
+# -*- coding: shift-jis -*-
 import numpy as np
 import struct
 

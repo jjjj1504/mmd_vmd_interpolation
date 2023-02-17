@@ -1,3 +1,4 @@
+# -*- coding: shift-jis -*-
 import numpy as np
 
 from mmd_vmd_interpolation.vmd_profile import VmdSimpleProfile
