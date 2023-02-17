@@ -1,5 +1,5 @@
-import struct
 import numpy as np
+import struct
 
 
 class VmdSimpleProfile:
