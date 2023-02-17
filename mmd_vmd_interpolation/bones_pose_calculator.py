@@ -1,4 +1,4 @@
-import nump as np
+import numpy as np
 
 from mmd_curve_interp import MMDCurveInterp
 from vmd_profile import VmdBoneData
