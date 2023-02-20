@@ -40,7 +40,11 @@ def generate_nonrotatable_bones_data(src, dst, motion_time_delay=0.0):
         return
 
     # setting
-    desired_bones_names = ["全ての親","センター","グルーブ","腰","上半身","上半身2","首","頭","面","右肩P","右肩","右腕","左肩P","左肩","左腕"]
+    desired_bones_names = [
+        "全ての親", "センター", "グルーブ", "腰",
+        "上半身", "上半身2", "首", "頭", "面",
+        "右肩P", "右肩", "右腕", "左肩P", "左肩", "左腕",
+    ]
     bones_tree = BonesTree.get([
         ["全ての親", None, np.array([0., 0., 0.])],
         ["センター", "全ての親", np.array([0., 8., 0.])],
@@ -93,7 +97,10 @@ def generate_nonrotatable_bones_data(src, dst, motion_time_delay=0.0):
     # generate nonrotatable bones
     print("generating nonrotatable bones...")
     nonrotatable_bones = bpc.get_lpf_full_positions_bones(motion_time_delay)
-    nonrotatable_bones_remap = {new_name: nonrotatable_bones[old_name] for old_name, new_name in bones_name_remap.items()}
+    nonrotatable_bones_remap = {
+        new_name: nonrotatable_bones[old_name] \
+            for old_name, new_name in bones_name_remap.items()
+    }
 
     # write to file
     print("exporting nonrotatable bone data to file: %s ..." % dst)
