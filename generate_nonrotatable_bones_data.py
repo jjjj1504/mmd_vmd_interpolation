@@ -1,4 +1,6 @@
 # -*- coding: shift-jis -*-
+import argparse
+
 import numpy as np
 
 from mmd_vmd_interpolation.vmd_profile import VmdSimpleProfile
@@ -10,10 +12,22 @@ from mmd_vmd_interpolation.bones_pose_calculator import (
 
 def main():
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("src", type=str, help="source motion vmd file")
+    parser.add_argument(
+        "-o", "--output", type=str, default="output_nonrotatable_bone_motion.vmd",
+        help="output nonrotatable bones motion vmd file",
+    )
+    parser.add_argument(
+        "-d", "--delay", type=float, default=0.0,
+        help="time delay of motion smoothing (second)",
+    )
+    args = parser.parse_args()
+
     generate_nonrotatable_bones_data(
-        src = "bbfモーションby@Ai.vmd",
-        dst = "oooooooooout.vmd",
-        motion_time_delay=0.5,
+        src=args.src,
+        dst=args.output,
+        motion_time_delay=args.delay,
     )
 
 
