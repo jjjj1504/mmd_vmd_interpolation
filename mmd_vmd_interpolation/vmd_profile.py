@@ -228,7 +228,7 @@ class VmdSimpleProfile:
                 raw[20:24] = camera_data.curve_rot[i][[0,2,1,3]]
                 raw[24:28] = camera_data.curve_dis[i][[0,2,1,3]]
                 raw[28:32] = camera_data.curve_fov[i][[0,2,1,3]]
-                raw[32] = int(camera_data.fov_angles[i])
+                raw[32] = int(round(camera_data.fov_angles[i]))
                 raw[33] = camera_data.perspective_flags[i]
                 fp.write(cls._CAMERA_FORMAT.pack(*raw))
             # light
