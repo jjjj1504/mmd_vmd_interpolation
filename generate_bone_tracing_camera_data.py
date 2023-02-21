@@ -122,7 +122,7 @@ def generate_bone_tracing_camera_data(
         )
 
     # write to file
-    print("exporting camera data to file: %s ..." % dst_camera)
+    print("exporting camera data to file: '%s' ..." % dst_camera)
     vpc.write_camera(dst_camera, camera_interp)
     print("done!")
 
