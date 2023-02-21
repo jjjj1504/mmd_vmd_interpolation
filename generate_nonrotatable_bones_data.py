@@ -103,7 +103,7 @@ def generate_nonrotatable_bones_data(src, dst, motion_time_delay=0.0):
     }
 
     # write to file
-    print("exporting nonrotatable bone data to file: %s ..." % dst)
+    print("exporting nonrotatable bone data to file: '%s' ..." % dst)
     vp.write_bones(dst, dst_model_name, nonrotatable_bones_remap)
     print("done!")
 
