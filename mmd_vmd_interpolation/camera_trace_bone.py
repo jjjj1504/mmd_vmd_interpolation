@@ -70,7 +70,7 @@ class CameraSmoother(object):
         # fov
         if need_smooth_fov_angles:
             self._interp_smooth(self._camera_data.fov_angles, self._camera_data.curve_fov, self._camera_data_interp.fov_angles)
-            mask = np.ones(len(self._camera_data_interp.get_frame_num()), dtype="bool")
+            mask = np.ones(self._camera_data_interp.get_frame_num(), dtype="bool")
         else:
             self._interp_default(self._camera_data.fov_angles, self._camera_data.curve_fov, self._camera_data_interp.fov_angles)
             mask = self._get_various_mask_for_default(self._camera_data.fov_angles, self._camera_data_interp.fov_angles)
