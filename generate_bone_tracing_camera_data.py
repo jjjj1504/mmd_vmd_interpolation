@@ -1,4 +1,6 @@
 # -*- coding: shift-jis -*-
+import argparse
+
 from mmd_vmd_interpolation.bones_pose_calculator import BonesPoseCalculator
 from mmd_vmd_interpolation.camera_trace_bone import (
     CameraSmoother,
@@ -9,11 +11,64 @@ from mmd_vmd_interpolation.vmd_profile import VmdSimpleProfile
 
 def main():
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "src_camera", type=str,
+        help="source camera vmd file",
+    )
+    parser.add_argument(
+        "-o", "--output", type=str, default="output_camera.vmd",
+        help="output camera vmd file",
+    )
+    parser.add_argument(
+        "-b", "--src_nonrotatable_bone", type=str,
+        help="nonrotatable bone vmd file",
+    )
+    parser.add_argument(
+        "-t", "--trace_bone_name", type=str,
+        help="name of the bone camera wanted to trace",
+    )
+    parser.add_argument(
+        "--shake_interval", type=float, default=0.0,
+        help="period of camera shaking motion (second)",
+    )
+    parser.add_argument(
+        "--shake_amplitude", type=float, default=0.0,
+        help="aplitude of camera shaking motion (meter)",
+    )
+    parser.add_argument(
+        "--force_default_interp", action="store_true",
+        help="flag of using mmd default interpolation",
+    )
+    parser.add_argument(
+        "--smooth_fov_angles", action="store_true",
+        help="flag of smoothing camera fov angles",
+    )
+    args = parser.parse_args()
+
+    # add some warning message
+    if args.src_nonrotatable_bone and not args.trace_bone_name:
+        print(
+            "Because trace_bone_name is not given, " \
+            "ignore src_nonrotatable_bone: '%s'\n" \
+             % args.src_nonrotatable_bone
+        )
+    elif not args.src_nonrotatable_bone and args.trace_bone_name:
+        print(
+            "Because src_nonrotatable_bone is not given, " \
+            "ignore trace_bone_name: '%s'\n" \
+             % args.trace_bone_name
+        )
+
     generate_bone_tracing_camera_data(
-        src_camera = "bbf_camera_trace_face.vmd",
-        dst_camera = "9898989898.vmd",
-        src_nonrotatable_bone = "short.vmd", #"bbfモーションby@Ai_nonrotatable_delay05.vmd",
-        trace_bone_name = "face",
+        src_camera=args.src_camera,
+        dst_camera=args.output,
+        src_nonrotatable_bone=args.src_nonrotatable_bone,
+        trace_bone_name=args.trace_bone_name,
+        camera_shake_interval=args.shake_interval,
+        camera_shake_amplitude=args.shake_amplitude,
+        need_smooth=not args.force_default_interp,
+        need_smooth_fov_angles=args.smooth_fov_angles,
     )
 
 
