@@ -111,12 +111,15 @@ def generate_bone_tracing_camera_data(
             print("load %d frames of bone %s" % (bone_data.get_frame_num(), bone_data.name))
 
         print("calculate camera tracing bone...")
-        camera_interp.distances = camera_interp.positions[:,2]   # camera distance data is redundant (useless, and misleading) for bone tracing
+        # camera distance data is redundant (useless, and misleading) for bone tracing
+        camera_interp.distances = camera_interp.positions[:,2]
         camera_interp.positions = CameraTracer.trace_bone(camera_interp, bone_data)
 
     if camera_shake_interval > 0. and camera_shake_amplitude > 0.:
         print("add cammera shake...")
-        camera_interp.positions = CameraTracer.add_camera_shake(camera_interp, camera_shake_interval, camera_shake_amplitude)
+        camera_interp.positions = CameraTracer.add_camera_shake(
+            camera_interp, camera_shake_interval, camera_shake_amplitude,
+        )
 
     # write to file
     print("exporting camera data to file: %s ..." % dst_camera)
