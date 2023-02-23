@@ -131,10 +131,10 @@ class MMDCurveInterp(object):
         b3a = b/(3*a)
         p = ca - 3*(b3a**2)
         q = d/a + 2*(b3a**3) - ca*b3a
-        delta = q**2 + (4/27.0)*(p**3)
+        delta = q**2 + (4/27.0)*(p**3)  # discriminant of cubic equation
         # case discussion
         sols = np.zeros_like(delta, dtype="float")
-        mask = delta >= 0
+        mask = delta >= 0  # single real root or triple real roots
         # case for single real root
         delta_sqrt_mask = np.sqrt(delta[mask])
         m_mask = np.cbrt(0.5*(-q[mask] + delta_sqrt_mask))
