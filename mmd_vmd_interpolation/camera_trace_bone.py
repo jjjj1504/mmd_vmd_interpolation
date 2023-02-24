@@ -52,17 +52,29 @@ class CameraSmoother(object):
     def interp(self, need_smooth, need_smooth_fov_angles=False):
         # most
         if need_smooth:
-            self._interp_smooth(self._camera_data.positions[:,0], self._camera_data.curve_x, self._camera_data_interp.positions[:,0])
-            self._interp_smooth(self._camera_data.positions[:,1], self._camera_data.curve_y, self._camera_data_interp.positions[:,1])
-            self._interp_smooth(self._camera_data.positions[:,2], self._camera_data.curve_z, self._camera_data_interp.positions[:,2])
-            self._interp_smooth(self._camera_data.orientations, self._camera_data.curve_rot, self._camera_data_interp.orientations)
-            self._interp_smooth(self._camera_data.distances, self._camera_data.curve_dis, self._camera_data_interp.distances)
+            fun_interp = self._interp_smooth
         else:
-            self._interp_default(self._camera_data.positions[:,0], self._camera_data.curve_x, self._camera_data_interp.positions[:,0])
-            self._interp_default(self._camera_data.positions[:,1], self._camera_data.curve_y, self._camera_data_interp.positions[:,1])
-            self._interp_default(self._camera_data.positions[:,2], self._camera_data.curve_z, self._camera_data_interp.positions[:,2])
-            self._interp_default(self._camera_data.orientations, self._camera_data.curve_rot, self._camera_data_interp.orientations)
-            self._interp_default(self._camera_data.distances, self._camera_data.curve_dis, self._camera_data_interp.distances)
+            fun_interp = self._interp_default
+        fun_interp(
+            self._camera_data.positions[:,0], self._camera_data.curve_x,
+            self._camera_data_interp.positions[:,0],
+        )
+        fun_interp(
+            self._camera_data.positions[:,1], self._camera_data.curve_y,
+            self._camera_data_interp.positions[:,1],
+        )
+        fun_interp(
+            self._camera_data.positions[:,2], self._camera_data.curve_z,
+            self._camera_data_interp.positions[:,2],
+        )
+        fun_interp(
+            self._camera_data.orientations, self._camera_data.curve_rot,
+            self._camera_data_interp.orientations,
+        )
+        fun_interp(
+            self._camera_data.distances, self._camera_data.curve_dis,
+            self._camera_data_interp.distances,
+        )
         # just check how much overshoot is in the interpolation
         need_plot_curve_for_debug = False
         if need_plot_curve_for_debug:
@@ -230,12 +242,13 @@ class CameraTracer(object):
             camera_local_motion.T
         ).T
         # align bone data length with camera data length
-        if bone_full_interp_data.get_frame_num() > camera_interp_data.frame_ids[-1]:
+        bone_frame_num = bone_full_interp_data.get_frame_num()
+        if bone_frame_num > camera_interp_data.frame_ids[-1]:
             bone_motion = bone_full_interp_data.positions[camera_interp_data.frame_ids]
         else:
             bone_motion_padding = np.zeros([camera_interp_data.frame_ids[-1]+1, 3])
-            bone_motion_padding[:bone_full_interp_data.get_frame_num()] = bone_full_interp_data.positions
-            bone_motion_padding[bone_full_interp_data.get_frame_num():] = bone_full_interp_data.positions[-1]
+            bone_motion_padding[:bone_frame_num] = bone_full_interp_data.positions
+            bone_motion_padding[bone_frame_num:] = bone_full_interp_data.positions[-1]
             bone_motion = bone_motion_padding[camera_interp_data.frame_ids]
         # camera total motion for tracing bone
         camera_total_motion = bone_motion + camera_motion
