@@ -207,7 +207,11 @@ class CameraSmoother(object):
                     values_interp_section = values_interp[loc0:loc1+1]
                     mask_section = mask[loc0:loc1+1]
                     # middle frames
-                    values_section_diff = np.append(np.append(0, np.where(np.diff(np.round(values_interp_section)))[0]+1), len(values_interp_section))
+                    values_section_diff = np.hstack([
+                        0,
+                        np.where(np.diff(np.round(values_interp_section)))[0] + 1,
+                        len(values_interp_section),
+                    ])
                     values_section_diff_endpoints = np.row_stack([
                         values_section_diff[:-1], values_section_diff[1:],
                     ])
