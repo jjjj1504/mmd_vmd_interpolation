@@ -46,18 +46,29 @@ def main():
     )
     args = parser.parse_args()
 
-    # add some warning message
+    # warning message about src_nonrotatable_bone
     if args.src_nonrotatable_bone and not args.trace_bone_name:
         print(
-            "Because trace_bone_name is not given, " \
-            "ignore src_nonrotatable_bone: '%s'\n" \
+            "\nWarning: because trace_bone_name is not given, "
+            "ignore src_nonrotatable_bone: '%s'\n"
              % args.src_nonrotatable_bone
         )
     elif not args.src_nonrotatable_bone and args.trace_bone_name:
         print(
-            "Because src_nonrotatable_bone is not given, " \
-            "ignore trace_bone_name: '%s'\n" \
+            "\nWarning: because src_nonrotatable_bone is not given, "
+            "ignore trace_bone_name: '%s'\n"
              % args.trace_bone_name
+        )
+    # warning message about camera shaking
+    if args.shake_interval and not args.shake_amplitude:
+        print(
+            "\nWarning: because shake_amplitude is not given, "
+            "ignore shake_interval: %f sec\n" % args.shake_interval
+        )
+    elif not args.shake_interval and args.shake_amplitude:
+        print(
+            "\nWarning: because shake_interval is not given, "
+            "ignore shake_amplitude: %f m\n" % args.shake_amplitude
         )
 
     generate_bone_tracing_camera_data(
@@ -116,7 +127,10 @@ def generate_bone_tracing_camera_data(
         camera_interp.positions = CameraTracer.trace_bone(camera_interp, bone_data)
 
     if camera_shake_interval > 0. and camera_shake_amplitude > 0.:
-        print("add cammera shake...")
+        print(
+            "add cammera shake with interval %f sec and amplitiude %f m ..."
+            % (camera_shake_interval, camera_shake_amplitude)
+        )
         camera_interp.positions = CameraTracer.add_camera_shake(
             camera_interp, camera_shake_interval, camera_shake_amplitude,
         )

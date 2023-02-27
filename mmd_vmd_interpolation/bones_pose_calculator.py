@@ -21,8 +21,8 @@ class BonesTree(object):
         # get translation from parent bone
         for bone_name, bone_info in bones_tree.items():
             if bone_info["parent"] is not None:
-                bone_info["trans_from_parent"] = \
-                    bone_info["position"] - bones_tree[bone_info["parent"]]["position"]
+                bone_info["trans_from_parent"] = (bone_info["position"]
+                    - bones_tree[bone_info["parent"]]["position"])
         return bones_tree
 
 
@@ -31,7 +31,10 @@ class BonesPoseCalculator(object):
     def __init__(self, bones_data, bone_tree={}):
         self._bones_data = bones_data  # type: dict[str, VmdBoneData]
         self._bones_tree = bone_tree
-        self._full_frame_num = max([b.frame_ids[-1] if b.get_frame_num() else 0 for b in self._bones_data.values()])
+        self._full_frame_num = max([
+            b.frame_ids[-1] if b.get_frame_num() else 0 \
+                for b in self._bones_data.values()
+        ])
         self._bones_full_interp = {}  # type: dict[str, VmdBoneData]
         self._bones_full_pose = {}  # type: dict[str, VmdBoneData]
         self._bones_full_position_lpf = {}  # type: dict[str, np.ndarray]
@@ -115,8 +118,10 @@ class BonesPoseCalculator(object):
         bone_full_pose = VmdBoneData(bone_name, full_frame_num)
         bone_full_pose.frame_ids = bone_full_interp.frame_ids
         full_orientations_T, full_positions_T = Transform.transform_pose(
-            parent_full_pose.orientations.T, parent_full_pose.positions.T,
-            bone_full_interp.orientations.T, (bone_full_interp.positions + trans_from_parent).T,
+            parent_full_pose.orientations.T,
+            parent_full_pose.positions.T,
+            bone_full_interp.orientations.T,
+            (bone_full_interp.positions + trans_from_parent).T,
         )
         bone_full_pose.orientations = full_orientations_T.T
         bone_full_pose.positions = full_positions_T.T
@@ -165,7 +170,8 @@ class BonesPoseCalculator(object):
 
             # low pass filter constant
             dt = 1/30.0
-            time_constant = time_delay/2.5  # time delay is defined as the rise time for reaching about 90% of step input
+            time_constant = time_delay/2.5  # time delay is defined as the rise time
+                                            # for reaching about 90% of step input
             pole_mag = 1.0/time_constant
             lag_ratio = 1.0 / (1.0 + pole_mag*dt)
             update_ratio = 1.0 - lag_ratio

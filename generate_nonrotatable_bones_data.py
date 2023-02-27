@@ -95,7 +95,10 @@ def generate_nonrotatable_bones_data(src, dst, motion_time_delay=0.0):
     bones_interp_data = bpc.get_full_interp_bones()
 
     # generate nonrotatable bones
-    print("generating nonrotatable bones...")
+    print(
+        "generating nonrotatable bones "
+        "with %f sec of time delay..." % motion_time_delay
+    )
     nonrotatable_bones = bpc.get_lpf_full_positions_bones(motion_time_delay)
     nonrotatable_bones_remap = {
         new_name: nonrotatable_bones[old_name] \

@@ -52,30 +52,53 @@ class CameraSmoother(object):
     def interp(self, need_smooth, need_smooth_fov_angles=False):
         # most
         if need_smooth:
-            self._interp_smooth(self._camera_data.positions[:,0], self._camera_data.curve_x, self._camera_data_interp.positions[:,0])
-            self._interp_smooth(self._camera_data.positions[:,1], self._camera_data.curve_y, self._camera_data_interp.positions[:,1])
-            self._interp_smooth(self._camera_data.positions[:,2], self._camera_data.curve_z, self._camera_data_interp.positions[:,2])
-            self._interp_smooth(self._camera_data.orientations, self._camera_data.curve_rot, self._camera_data_interp.orientations)
-            self._interp_smooth(self._camera_data.distances, self._camera_data.curve_dis, self._camera_data_interp.distances)
+            fun_interp = self._interp_smooth
         else:
-            self._interp_default(self._camera_data.positions[:,0], self._camera_data.curve_x, self._camera_data_interp.positions[:,0])
-            self._interp_default(self._camera_data.positions[:,1], self._camera_data.curve_y, self._camera_data_interp.positions[:,1])
-            self._interp_default(self._camera_data.positions[:,2], self._camera_data.curve_z, self._camera_data_interp.positions[:,2])
-            self._interp_default(self._camera_data.orientations, self._camera_data.curve_rot, self._camera_data_interp.orientations)
-            self._interp_default(self._camera_data.distances, self._camera_data.curve_dis, self._camera_data_interp.distances)
+            fun_interp = self._interp_default
+        fun_interp(
+            self._camera_data.positions[:,0], self._camera_data.curve_x,
+            self._camera_data_interp.positions[:,0],
+        )
+        fun_interp(
+            self._camera_data.positions[:,1], self._camera_data.curve_y,
+            self._camera_data_interp.positions[:,1],
+        )
+        fun_interp(
+            self._camera_data.positions[:,2], self._camera_data.curve_z,
+            self._camera_data_interp.positions[:,2],
+        )
+        fun_interp(
+            self._camera_data.orientations, self._camera_data.curve_rot,
+            self._camera_data_interp.orientations,
+        )
+        fun_interp(
+            self._camera_data.distances, self._camera_data.curve_dis,
+            self._camera_data_interp.distances,
+        )
         # just check how much overshoot is in the interpolation
         need_plot_curve_for_debug = False
         if need_plot_curve_for_debug:
             self._plot_for_debug()
         # fov
         if need_smooth_fov_angles:
-            self._interp_smooth(self._camera_data.fov_angles, self._camera_data.curve_fov, self._camera_data_interp.fov_angles)
+            self._interp_smooth(
+                self._camera_data.fov_angles, self._camera_data.curve_fov,
+                self._camera_data_interp.fov_angles,
+            )
             mask = np.ones(self._camera_data_interp.get_frame_num(), dtype="bool")
         else:
-            self._interp_default(self._camera_data.fov_angles, self._camera_data.curve_fov, self._camera_data_interp.fov_angles)
-            mask = self._get_various_mask_for_default(self._camera_data.fov_angles, self._camera_data_interp.fov_angles)
+            self._interp_default(
+                self._camera_data.fov_angles, self._camera_data.curve_fov,
+                self._camera_data_interp.fov_angles,
+            )
+            mask = self._get_various_mask_for_default(
+                self._camera_data.fov_angles, self._camera_data_interp.fov_angles
+            )
         # perspective
-        self._interp_constant(self._camera_data.perspective_flags, self._camera_data_interp.perspective_flags)
+        self._interp_constant(
+            self._camera_data.perspective_flags,
+            self._camera_data_interp.perspective_flags,
+        )
         # apply mask
         self._camera_data_interp.apply_mask(mask)
         # return
@@ -184,9 +207,18 @@ class CameraSmoother(object):
                     values_interp_section = values_interp[loc0:loc1+1]
                     mask_section = mask[loc0:loc1+1]
                     # middle frames
-                    values_section_diff = np.append(np.append(0, np.where(np.diff(np.round(values_interp_section)))[0]+1), len(values_interp_section))
-                    values_section_diff_endpoints = np.row_stack([values_section_diff[:-1], values_section_diff[1:]])
-                    diff_ind = np.round( 0.5*(values_section_diff_endpoints[0,:] + values_section_diff_endpoints[1,:]+1) ).astype("int")
+                    values_section_diff = np.hstack([
+                        0,
+                        np.where(np.diff(np.round(values_interp_section)))[0] + 1,
+                        len(values_interp_section),
+                    ])
+                    values_section_diff_endpoints = np.row_stack([
+                        values_section_diff[:-1], values_section_diff[1:],
+                    ])
+                    diff_ind = np.round(
+                        (values_section_diff_endpoints[0,:]
+                        + values_section_diff_endpoints[1,:] + 1) / 2.0
+                    ).astype("int")
                     mask_section[diff_ind[1:-1]] = True
                     # endpoints frame
                     mask_section[0] = True
@@ -208,27 +240,38 @@ class CameraTracer(object):
         camera_local_motion = np.zeros_like(camera_interp_data.positions)
         camera_local_motion[:, 0:2] = camera_interp_data.positions[:, 0:2]
         camera_motion = Transform.rotate_vector(
-            Transform.convert_mmd_euler_angles_to_quaternion(camera_interp_data.orientations.T),
+            Transform.convert_mmd_euler_angles_to_quaternion(
+                camera_interp_data.orientations.T
+            ),
             camera_local_motion.T
         ).T
         # align bone data length with camera data length
-        if bone_full_interp_data.get_frame_num() > camera_interp_data.frame_ids[-1]:
+        bone_frame_num = bone_full_interp_data.get_frame_num()
+        if bone_frame_num > camera_interp_data.frame_ids[-1]:
             bone_motion = bone_full_interp_data.positions[camera_interp_data.frame_ids]
         else:
             bone_motion_padding = np.zeros([camera_interp_data.frame_ids[-1]+1, 3])
-            bone_motion_padding[:bone_full_interp_data.get_frame_num()] = bone_full_interp_data.positions
-            bone_motion_padding[bone_full_interp_data.get_frame_num():] = bone_full_interp_data.positions[-1]
+            bone_motion_padding[:bone_frame_num] = bone_full_interp_data.positions
+            bone_motion_padding[bone_frame_num:] = bone_full_interp_data.positions[-1]
             bone_motion = bone_motion_padding[camera_interp_data.frame_ids]
         # camera total motion for tracing bone
         camera_total_motion = bone_motion + camera_motion
         return camera_total_motion
 
     @classmethod
-    def add_camera_shake(cls, camera_interp_data, camera_shake_interval=1.0, camera_shake_amplitude=0.0):
+    def add_camera_shake(
+            cls, camera_interp_data,
+            camera_shake_interval=1.0, camera_shake_amplitude=0.0,
+        ):
         shake_local_motion = np.zeros_like(camera_interp_data.positions)
-        shake_local_motion[:, 0:2] = cls._gen_2d_shake_motion(camera_interp_data.frame_ids, camera_shake_interval, camera_shake_amplitude)
+        shake_local_motion[:, 0:2] = cls._gen_2d_shake_motion(
+            camera_interp_data.frame_ids, camera_shake_interval,
+            camera_shake_amplitude,
+        )
         shake_motion = Transform.rotate_vector(
-            Transform.convert_mmd_euler_angles_to_quaternion(camera_interp_data.orientations.T),
+            Transform.convert_mmd_euler_angles_to_quaternion(
+                camera_interp_data.orientations.T
+            ),
             shake_local_motion.T
         ).T
         camera_motion_with_shake = camera_interp_data.positions + shake_motion
@@ -245,7 +288,8 @@ class CameraTracer(object):
         # generate random shake points from polar coordinate system
         mmd_length_unit_per_meter = 1.0 / 0.08
         camera_shake_amplitude_std = camera_shake_amplitude / 3.0
-        shake_points = (camera_shake_amplitude_std * mmd_length_unit_per_meter) * np.random.randn(len(shake_frame_ids), 2)
+        shake_points = (camera_shake_amplitude_std * mmd_length_unit_per_meter) \
+            * np.random.randn(len(shake_frame_ids), 2)
         # smooth
         shake_motion = SmoothInterp.interp(shake_frame_ids, shake_points, frame_ids)
         return shake_motion
