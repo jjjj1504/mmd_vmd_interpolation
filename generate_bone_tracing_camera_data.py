@@ -127,7 +127,10 @@ def generate_bone_tracing_camera_data(
         camera_interp.positions = CameraTracer.trace_bone(camera_interp, bone_data)
 
     if camera_shake_interval > 0. and camera_shake_amplitude > 0.:
-        print("add cammera shake...")
+        print(
+            "add cammera shake with interval %f sec and amplitiude %f m ..."
+            % (camera_shake_interval, camera_shake_amplitude)
+        )
         camera_interp.positions = CameraTracer.add_camera_shake(
             camera_interp, camera_shake_interval, camera_shake_amplitude,
         )
