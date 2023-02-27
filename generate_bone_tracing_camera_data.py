@@ -59,6 +59,17 @@ def main():
             "ignore trace_bone_name: '%s'\n"
              % args.trace_bone_name
         )
+    # warning message about camera shaking
+    if args.shake_interval and not args.shake_amplitude:
+        print(
+            "\nWarning: because shake_amplitude is not given, "
+            "ignore shake_interval: %f sec\n" % args.shake_interval
+        )
+    elif not args.shake_interval and args.shake_amplitude:
+        print(
+            "\nWarning: because shake_interval is not given, "
+            "ignore shake_amplitude: %f m\n" % args.shake_amplitude
+        )
 
     generate_bone_tracing_camera_data(
         src_camera=args.src_camera,
