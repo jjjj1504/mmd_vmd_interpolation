@@ -46,17 +46,17 @@ def main():
     )
     args = parser.parse_args()
 
-    # add some warning message
+    # warning message about src_nonrotatable_bone
     if args.src_nonrotatable_bone and not args.trace_bone_name:
         print(
-            "Because trace_bone_name is not given, " \
-            "ignore src_nonrotatable_bone: '%s'\n" \
+            "\nWarning: because trace_bone_name is not given, "
+            "ignore src_nonrotatable_bone: '%s'\n"
              % args.src_nonrotatable_bone
         )
     elif not args.src_nonrotatable_bone and args.trace_bone_name:
         print(
-            "Because src_nonrotatable_bone is not given, " \
-            "ignore trace_bone_name: '%s'\n" \
+            "\nWarning: because src_nonrotatable_bone is not given, "
+            "ignore trace_bone_name: '%s'\n"
              % args.trace_bone_name
         )
 
