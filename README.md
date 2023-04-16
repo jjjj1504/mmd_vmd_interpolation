@@ -17,6 +17,12 @@ The camera motion processed by this tool is applied in MMD videos belows
 
   > tracing groove (グルーブ) bone.
 
+* 【MMD】ラヴィット / Loveit - カルも式初音ミク【Camera DL】【1080p】  
+  https://youtu.be/-bQIrVkLFJw?t=6  
+  [![](https://markdown-videos.deta.dev/youtube/-bQIrVkLFJw)](https://youtu.be/-bQIrVkLFJw?t=6)
+
+  > tracing head (頭) bone.
+
 # Motivation
 
 * Want to export "bone tracing" camera data, which follows the position of desired
