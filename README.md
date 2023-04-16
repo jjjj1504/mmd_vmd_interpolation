@@ -13,6 +13,8 @@ The camera motion processed by this tool is applied in MMD videos belows
 * 【Azur Lane MMD】Formidable - Otome Dissection (乙女解剖)【Camera DL】【1080p】  
   https://youtu.be/jAezBPdKSWU?t=70  
 
+  [![](https://markdown-videos.deta.dev/youtube/jAezBPdKSWU)](https://youtu.be/jAezBPdKSWU?t=70)
+
   > tracing groove (グルーブ) bone.
 
 # Motivation
