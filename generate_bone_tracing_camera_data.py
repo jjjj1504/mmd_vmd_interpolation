@@ -44,6 +44,10 @@ def main():
         "--smooth_fov_angles", action="store_true",
         help="flag of smoothing camera fov angles",
     )
+    parser.add_argument(
+        "--interp_frame_interval", type=int, default=2,
+        help="number of frames between 2 interpolation frames",
+    )
     args = parser.parse_args()
 
     # warning message about src_nonrotatable_bone
@@ -80,6 +84,7 @@ def main():
         camera_shake_amplitude=args.shake_amplitude,
         need_smooth=not args.force_default_interp,
         need_smooth_fov_angles=args.smooth_fov_angles,
+        interp_frame_interval=args.interp_frame_interval,
     )
 
 
@@ -92,6 +97,7 @@ def generate_bone_tracing_camera_data(
         camera_shake_amplitude=0.1,
         src_nonrotatable_bone=None,
         trace_bone_name=None,
+        interp_frame_interval=2,
     ):
 
     vpc = VmdSimpleProfile(src_camera)
@@ -106,7 +112,7 @@ def generate_bone_tracing_camera_data(
     print("load %d frames of camera" % len(camera_data.frame_ids))
 
     # create object to processing camera data
-    cs = CameraSmoother(camera_data)
+    cs = CameraSmoother(camera_data, interp_frame_interval)
 
     # interpolation
     print("doing interpolation of camera data...")
