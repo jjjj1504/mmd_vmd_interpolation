@@ -56,13 +56,15 @@ The camera motion processed by this tool is applied in MMD videos belows
 * Convert dancing motion vmd file to "nonrotatable bone motion" vmd file
   by `generate_nonrotatable_bones_data.py`
 * Open MMD
-  + Load `nonrotatable_center_bone.pmx`,
+  + Load [`nonrotatable_center_bone.pmx`],
     and apply "nonrotatable bone motion" vmd file to it.
   + Register camera motion which following the bone of
     `nonrotatable_center_bone.pmx`.
   + Export the camera data to vmd file.
 * Convert the vmd file of camera data and nonrotatable bone motion
   to "bone tracing" camera vmd file by `generate_bone_tracing_camera_data.py`.
+
+[`nonrotatable_center_bone.pmx`]: https://bowlroll.net/file/298937
 
 # Dependency
 
