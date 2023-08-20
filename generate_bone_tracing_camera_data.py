@@ -1,4 +1,4 @@
-# -*- coding: shift-jis -*-
+# -*- coding: utf-8 -*-
 import argparse
 
 from mmd_vmd_interpolation.bones_pose_calculator import BonesPoseCalculator
