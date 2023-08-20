@@ -2,7 +2,7 @@ import sys
 
 import numpy as np
 
-from transform import Transform
+from .transform import Transform
 
 
 class MMDCurveInterp(object):
