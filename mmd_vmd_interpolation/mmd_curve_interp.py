@@ -20,13 +20,13 @@ class MMDCurveInterp(object):
         values[mask_1] = value_endpoint[1]
         # do the interpolation without endpoints
         mask = ~mask_0 & ~mask_1
-        values[mask] = cls._interp_withou_prevent_endpoint(
+        values[mask] = cls._interp_without_prevent_endpoint(
             frame_id_endpoint, value_endpoint, curve_param, frame_ids_desired[mask],
         )
         return values
 
     @classmethod
-    def _interp_withou_prevent_endpoint(
+    def _interp_without_prevent_endpoint(
             cls, frame_id_endpoint, value_endpoint, curve_param, frame_ids_desired,
         ):
         # needn't do interpolation for flat data
