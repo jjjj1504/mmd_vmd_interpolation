@@ -3,12 +3,16 @@ import scipy.interpolate
 
 from .mmd_curve_interp import MMDCurveInterp
 from .transform import Transform
-from .vmd_profile import VmdCameraData
+from .vmd_profile import (
+    VmdBoneData,
+    VmdCameraData,
+)
 
 
 class CameraSmoother(object):
 
     def __init__(self, camera_data, interp_frame_interval=2):
+        # type: (VmdCameraData, int) -> None
         self._camera_data = camera_data  # type: VmdCameraData
         self._interp_fram_ids = np.zeros(0, dtype="int")
         self._interp_frame_loc = np.zeros(0, dtype="int")
@@ -50,6 +54,7 @@ class CameraSmoother(object):
         self._seg_frame_interp_loc = np.array(seg_frame_interp_loc)
 
     def interp(self, need_smooth, need_smooth_fov_angles=False):
+        # type: (bool, bool) -> VmdCameraData
         # most
         if need_smooth:
             fun_interp = self._interp_smooth
@@ -105,6 +110,7 @@ class CameraSmoother(object):
         return self._camera_data_interp
 
     def _interp_default(self, values, curves, values_interp):
+        # type: (np.ndarray, np.ndarray, np.ndarray) -> None
         if self._camera_data.get_frame_num() > 1:
             frame_ids = self._camera_data.frame_ids
             interp_fram_ids = self._interp_fram_ids
@@ -129,6 +135,7 @@ class CameraSmoother(object):
             pass
 
     def _interp_smooth(self, values, curves, values_interp):
+        # type: (np.ndarray, np.ndarray, np.ndarray) -> None
         if self._camera_data.get_frame_num() > 1:
             frame_ids = self._camera_data.frame_ids
             interp_fram_ids = self._interp_fram_ids
@@ -164,6 +171,7 @@ class CameraSmoother(object):
             pass
 
     def _interp_constant(self, values, values_interp):
+        # type: (np.ndarray, np.ndarray) -> None
         if self._camera_data.get_frame_num() > 1:
             for i in range(self._camera_data.get_frame_num()-1):
                 loc0, loc1 = self._interp_frame_loc[i:i+2]
@@ -194,6 +202,7 @@ class CameraSmoother(object):
         )
 
     def _get_various_mask_for_default(self, values, values_interp):
+        # type: (np.ndarray, np.ndarray) -> np.ndarray
         if self._camera_data.get_frame_num() > 1:
             frame_ids = self._camera_data.frame_ids
             interp_fram_ids = self._interp_fram_ids
@@ -236,6 +245,7 @@ class CameraTracer(object):
 
     @staticmethod
     def trace_bone(camera_interp_data, bone_full_interp_data):
+        # type: (VmdCameraData, VmdBoneData) -> np.ndarray
         # convert camera motion from camera local frame to global frame
         camera_local_motion = np.zeros_like(camera_interp_data.positions)
         camera_local_motion[:, 0:2] = camera_interp_data.positions[:, 0:2]
@@ -263,6 +273,7 @@ class CameraTracer(object):
             cls, camera_interp_data,
             camera_shake_interval=1.0, camera_shake_amplitude=0.0,
         ):
+        # type: (VmdCameraData, float, float) -> np.ndarray
         shake_local_motion = np.zeros_like(camera_interp_data.positions)
         shake_local_motion[:, 0:2] = cls._gen_2d_shake_motion(
             camera_interp_data.frame_ids, camera_shake_interval,
@@ -279,6 +290,7 @@ class CameraTracer(object):
 
     @staticmethod
     def _gen_2d_shake_motion(frame_ids, camera_shake_interval, camera_shake_amplitude):
+        # type: (np.ndarray, float, float) -> np.ndarray
         # calculate how many shake points are needed
         fps = 30.0
         frame_per_interval = camera_shake_interval * fps
@@ -299,6 +311,7 @@ class SmoothInterp(object):
 
     @classmethod
     def interp(cls, frame_ids, values, frame_ids_desired):
+        # type: (np.ndarray, np.ndarray, np.ndarray) -> np.ndarray
         # f = scipy.interpolate.interp1d(frame_ids, values, kind="cubic", axis=0)
         f = scipy.interpolate.PchipInterpolator(frame_ids, values, axis=0)
         values_desired = f(frame_ids_desired)
