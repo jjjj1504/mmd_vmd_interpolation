@@ -1,4 +1,4 @@
-# -*- coding: shift-jis -*-
+# -*- coding: utf-8 -*-
 import numpy as np
 import struct
 
@@ -17,7 +17,7 @@ class VmdSimpleProfile:
         "Vocaloid Motion Data file" : 10,
         "Vocaloid Motion Data 0002" : 20,
     }
-    _CAMERA_HEADER_NAME = "ÉJÉÅÉâÅEè∆ñæ"
+    _CAMERA_HEADER_NAME = "„Ç´„É°„É©„ÉªÁÖßÊòé"
 
     ## struct usage
     ## https://docs.python.org/3/library/struct.html
