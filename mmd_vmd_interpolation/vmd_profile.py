@@ -5,6 +5,8 @@ import struct
 
 class VmdSimpleProfile:
 
+    _CODING = "shift-jis"
+
     ## vmd format
     ## https://mikumikudance.fandom.com/wiki/VMD_file_format
     ## https://blog.csdn.net/haseetxwd/article/details/82821533
@@ -76,14 +78,15 @@ class VmdSimpleProfile:
 
     def _get_header_version(self, fp):
         header_version_raw = fp.read(self._VERSION_LEN)
-        # ignore the string behind "\x00"
-        return header_version_raw.split("\x00")[0]
+        return self._decode_text(header_version_raw)
 
     def _get_model_name(self, fp, header_version):
-        return fp.read(self._MODEL_NAME_LEN[header_version]).split("\x00")[0]
+        model_name_raw = fp.read(self._MODEL_NAME_LEN[header_version])
+        return self._decode_text(model_name_raw)
 
     def _get_bone_name(self, fp):
-        return fp.read(self._BONE_NAME_LEN).split("\x00")[0]
+        bone_name_raw = fp.read(self._BONE_NAME_LEN)
+        return self._decode_text(bone_name_raw)
 
     def _get_bones_list(self, fp):
         self._seek(fp, "bone")
@@ -97,7 +100,7 @@ class VmdSimpleProfile:
                 bones_list[bone_name] += 1
             # skip binary data
             fp.seek(self._BONE_BIN_LEN, 1)
-        return bones_list.keys(), bones_list.values()
+        return bones_list
 
     def _get_desired_bones_data(self, fp, required_bones_names):
         # initialize
@@ -173,16 +176,18 @@ class VmdSimpleProfile:
     def write_bones(cls, dst, model_name, bones_data):
         with open(dst,"wb") as fp:
             # header
-            fp.write(cls._NEW_VERSION_HEADER.ljust(cls._VERSION_LEN,"\x00"))
+            version_header_raw = cls._encode_text(cls._NEW_VERSION_HEADER, cls._VERSION_LEN)
+            fp.write(version_header_raw)
             # model name
             model_name_len = cls._MODEL_NAME_LEN[cls._NEW_VERSION_HEADER]
-            fp.write(model_name.ljust(model_name_len,"\x00"))
+            model_name_raw = cls._encode_text(model_name, model_name_len)
+            fp.write(model_name_raw)
             # bone
             bones_frames_num = sum([len(b.frame_ids) for b in bones_data.values()])
             fp.write(cls._FRAME_NUM_FORMAT.pack(bones_frames_num))
             raw = [0] * cls._BONE_ATTR_NUM
             for name, bone_data in bones_data.items():
-                name_raw = name.ljust(cls._BONE_NAME_LEN,"\x00")
+                name_raw = cls._encode_text(name, cls._BONE_NAME_LEN)
                 for i in range(len(bone_data.frame_ids)):
                     fp.write(name_raw)
                     raw[0] = bone_data.frame_ids[i]
@@ -205,10 +210,12 @@ class VmdSimpleProfile:
         # type: (str, VmdCameraData) -> (None)
         with open(dst,"wb") as fp:
             # header
-            fp.write(cls._NEW_VERSION_HEADER.ljust(cls._VERSION_LEN,"\x00"))
+            version_header_raw = cls._encode_text(cls._NEW_VERSION_HEADER, cls._VERSION_LEN)
+            fp.write(version_header_raw)
             # model name
             model_name_len = cls._MODEL_NAME_LEN[cls._NEW_VERSION_HEADER]
-            fp.write(cls._CAMERA_HEADER_NAME.ljust(model_name_len,"\x00"))
+            model_name_raw = cls._encode_text(cls._CAMERA_HEADER_NAME, model_name_len)
+            fp.write(model_name_raw)
             # bone
             fp.write(cls._FRAME_NUM_FORMAT.pack(0))
             # morph
@@ -233,6 +240,22 @@ class VmdSimpleProfile:
                 fp.write(cls._CAMERA_FORMAT.pack(*raw))
             # light
             fp.write(cls._FRAME_NUM_FORMAT.pack(0))
+
+    @classmethod
+    def _decode_text(cls, raw):
+        # ignore the string behind "\x00"
+        raw = raw.split(b"\x00")[0]
+        # convert bytes to string
+        text = raw.decode(cls._CODING)
+        return text
+
+    @classmethod
+    def _encode_text(cls, text, length):
+        # convert string to bytes
+        raw = text.encode(cls._CODING)
+        # pad "\x00"
+        raw = raw.ljust(length, b"\x00")
+        return raw
 
 
 class VmdDataBase(object):

@@ -2,7 +2,7 @@ import sys
 
 import numpy as np
 
-from transform import Transform
+from .transform import Transform
 
 
 class MMDCurveInterp(object):
@@ -118,7 +118,7 @@ class MMDCurveInterp(object):
         coeffs_to_solve = cubic_bezier_coeffs[0, :] \
             - np.column_stack([np.zeros([len(x),3]), x])
         t_sol = cls._solve_cubic_equation_real_root_between_0_1(coeffs_to_solve)
-        y = (t_sol.reshape(-1,1) ** range(4)[::-1]).dot(cubic_bezier_coeffs[1,:])
+        y = (t_sol.reshape(-1,1) ** [3, 2, 1, 0]).dot(cubic_bezier_coeffs[1,:])
         return y
 
     @staticmethod
