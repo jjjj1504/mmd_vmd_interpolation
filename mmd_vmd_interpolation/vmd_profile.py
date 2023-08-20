@@ -97,7 +97,7 @@ class VmdSimpleProfile:
                 bones_list[bone_name] += 1
             # skip binary data
             fp.seek(self._BONE_BIN_LEN, 1)
-        return bones_list.keys(), bones_list.values()
+        return bones_list
 
     def _get_desired_bones_data(self, fp, required_bones_names):
         # initialize
