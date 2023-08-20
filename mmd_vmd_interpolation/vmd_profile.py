@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-import numpy as np
 import struct
+
+import numpy as np
 
 
 class VmdSimpleProfile:
