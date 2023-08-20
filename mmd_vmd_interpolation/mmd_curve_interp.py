@@ -7,6 +7,7 @@ class MMDCurveInterp(object):
 
     @classmethod
     def interp(cls, frame_id_endpoint, value_endpoint, curve_param, frame_ids_desired):
+        # type: (np.ndarray, np.ndarray, np.ndarray, np.ndarray) -> np.ndarray
         # output allocation
         if value_endpoint.ndim == 1:
             values = np.zeros_like(frame_ids_desired, dtype="float")
@@ -29,6 +30,7 @@ class MMDCurveInterp(object):
     def _interp_without_prevent_endpoint(
             cls, frame_id_endpoint, value_endpoint, curve_param, frame_ids_desired,
         ):
+        # type: (np.ndarray, np.ndarray, np.ndarray, np.ndarray) -> np.ndarray
         # needn't do interpolation for flat data
         if (value_endpoint[1] == value_endpoint[0]).all():
             if value_endpoint.ndim == 1:
@@ -58,6 +60,7 @@ class MMDCurveInterp(object):
             cls, frame_id_endpoint, position_endpoint,
             curve_param_xyz, frame_ids_desired,
         ):
+        # type: (np.ndarray, np.ndarray, np.ndarray, np.ndarray) -> np.ndarray
         position = np.zeros([len(frame_ids_desired), 3])
         for i in range(3):
             position[:,i] = cls.interp(
@@ -71,6 +74,7 @@ class MMDCurveInterp(object):
             cls, frame_id_endpoint, quaternion_endpoint,
             curve_param, frame_ids_desired,
         ):
+        # type: (np.ndarray, np.ndarray, np.ndarray, np.ndarray) -> np.ndarray
         if (quaternion_endpoint[0] == quaternion_endpoint[1]).all():
             return np.tile(quaternion_endpoint[0,:], [len(frame_ids_desired), 1])
         q_diff = Transform.divide_left_quaternion(
@@ -91,6 +95,7 @@ class MMDCurveInterp(object):
 
     @staticmethod
     def _get_bezier_curve_control_points(curve_param):
+        # type: (np.ndarray) -> np.ndarray
         control_point0 = np.array([0., 0.])
         control_point1 = curve_param[0:2] / 127.0
         control_point2 = curve_param[2:4] / 127.0
@@ -113,6 +118,7 @@ class MMDCurveInterp(object):
 
     @classmethod
     def _solve_cubic_bezier_y_from_x(cls, cubic_bezier_coeffs, x):
+        # type: (np.ndarray, np.ndarray) -> np.ndarray
         coeffs_to_solve = cubic_bezier_coeffs[0, :] \
             - np.column_stack([np.zeros([len(x),3]), x])
         t_sol = cls._solve_cubic_equation_real_root_between_0_1(coeffs_to_solve)
@@ -121,6 +127,7 @@ class MMDCurveInterp(object):
 
     @staticmethod
     def _solve_cubic_equation_real_root_between_0_1(coeffs):
+        # type: (np.ndarray) -> np.ndarray
         a = coeffs[:, 0]
         b = coeffs[:, 1]
         c = coeffs[:, 2]
