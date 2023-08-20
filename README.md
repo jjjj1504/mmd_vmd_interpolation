@@ -74,6 +74,6 @@ The camera motion processed by this tool is applied in MMD videos belows
 
 # Dependency
 
-* Python 2
+* Python 3
 * NumPy
 * SciPy
