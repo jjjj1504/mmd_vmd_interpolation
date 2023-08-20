@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import struct
+import io
 
 import numpy as np
 
@@ -41,11 +42,11 @@ class VmdSimpleProfile:
     _MORPH_BIN_LEN = _MORPH_LEN - _MORPH_NAME_LEN
 
     def __init__(self, src):
-        # type: (str) -> (None)
+        # type: (str) -> None
         self.src = src
 
     def _seek(self, fp, part):
-        # type: (file, str) -> (None)
+        # type: (io.BufferedReader, str) -> None
         # go to the start point of file header version
         fp.seek(0, 0)
         if part == "version":
@@ -75,21 +76,26 @@ class VmdSimpleProfile:
             return
 
     def _get_frame_num(self, fp):
+        # type: (io.BufferedReader) -> int
         return self._FRAME_NUM_FORMAT.unpack(fp.read(self._FRAME_NUM_LEN))[0]
 
     def _get_header_version(self, fp):
+        # type: (io.BufferedReader) -> str
         header_version_raw = fp.read(self._VERSION_LEN)
         return self._decode_text(header_version_raw)
 
     def _get_model_name(self, fp, header_version):
+        # type: (io.BufferedReader, str) -> str
         model_name_raw = fp.read(self._MODEL_NAME_LEN[header_version])
         return self._decode_text(model_name_raw)
 
     def _get_bone_name(self, fp):
+        # type: (io.BufferedReader) -> str
         bone_name_raw = fp.read(self._BONE_NAME_LEN)
         return self._decode_text(bone_name_raw)
 
     def _get_bones_list(self, fp):
+        # type: (io.BufferedReader) -> dict[str, int]
         self._seek(fp, "bone")
         bone_frame_num = self._get_frame_num(fp)
         bones_list = {}   # type: dict[str, int]
@@ -104,8 +110,9 @@ class VmdSimpleProfile:
         return bones_list
 
     def _get_desired_bones_data(self, fp, required_bones_names):
+        # type: (io.BufferedReader, list[str]) -> dict[str, VmdBoneData]
         # initialize
-        data_dict = dict.fromkeys(required_bones_names)
+        data_dict = dict.fromkeys(required_bones_names)  # type: dict[str, VmdBoneData]
         for bone_name in required_bones_names:
             data_dict[bone_name] = VmdBoneData(bone_name)
         # seek required bones in bones data block
@@ -134,6 +141,7 @@ class VmdSimpleProfile:
         return data_dict
 
     def _get_camera_data(self, fp):
+        # type: (io.BufferedReader) -> VmdCameraData
         self._seek(fp, "camera")
         camera_frame_num = self._get_frame_num(fp)
         data = VmdCameraData(camera_frame_num)
@@ -175,6 +183,7 @@ class VmdSimpleProfile:
 
     @classmethod
     def write_bones(cls, dst, model_name, bones_data):
+        # type: (str, str, dict[str, VmdBoneData]) -> None
         with open(dst,"wb") as fp:
             # header
             version_header_raw = cls._encode_text(cls._NEW_VERSION_HEADER, cls._VERSION_LEN)
@@ -208,7 +217,7 @@ class VmdSimpleProfile:
 
     @classmethod
     def write_camera(cls, dst, camera_data):
-        # type: (str, VmdCameraData) -> (None)
+        # type: (str, VmdCameraData) -> None
         with open(dst,"wb") as fp:
             # header
             version_header_raw = cls._encode_text(cls._NEW_VERSION_HEADER, cls._VERSION_LEN)
@@ -244,6 +253,7 @@ class VmdSimpleProfile:
 
     @classmethod
     def _decode_text(cls, raw):
+        # type: (bytes) -> str
         # ignore the string behind "\x00"
         raw = raw.split(b"\x00")[0]
         # convert bytes to string
@@ -252,6 +262,7 @@ class VmdSimpleProfile:
 
     @classmethod
     def _encode_text(cls, text, length):
+        # type: (str, int) -> bytes
         # convert string to bytes
         raw = text.encode(cls._CODING)
         # pad "\x00"
@@ -277,13 +288,16 @@ class VmdDataBase(object):
 
     @classmethod
     def _gen_default_curve(cls, frame_num):
+        # type: (int) -> np.ndarray
         return np.tile(cls._CURVE_DEFAULT, [frame_num, 1])
 
     @classmethod
     def _gen_default_quaternion(cls, frame_num):
+        # type: (int) -> np.ndarray
         return np.tile(cls._QUATERNION_DEFAULT, [frame_num, 1])
 
     def apply_mask(self, mask):
+        # type: (np.ndarray) -> None
         for member_name, member_value in self.__dict__.items():
             if type(member_value) is np.ndarray:
                 setattr(self, member_name, member_value[mask])
@@ -292,19 +306,19 @@ class VmdDataBase(object):
 class VmdCameraData(VmdDataBase):
 
     def __init__(self, frame_num):
-        # type: (int) -> (None)
-        self.frame_ids = np.zeros(frame_num, dtype="int")
-        self.distances = np.zeros(frame_num)
-        self.positions = np.zeros([frame_num, 3])
-        self.orientations = np.zeros([frame_num, 3])
+        # type: (int) -> None
+        self.frame_ids = np.zeros(frame_num, dtype="int")  # type: np.ndarray
+        self.distances = np.zeros(frame_num)  # type: np.ndarray
+        self.positions = np.zeros([frame_num, 3])  # type: np.ndarray
+        self.orientations = np.zeros([frame_num, 3])  # type: np.ndarray
         self.curve_x = self._gen_default_curve(frame_num)
         self.curve_y = self._gen_default_curve(frame_num)
         self.curve_z = self._gen_default_curve(frame_num)
         self.curve_rot = self._gen_default_curve(frame_num)
         self.curve_dis = self._gen_default_curve(frame_num)
         self.curve_fov = self._gen_default_curve(frame_num)
-        self.fov_angles = np.zeros([frame_num])
-        self.perspective_flags = np.ones(frame_num, "bool")
+        self.fov_angles = np.zeros([frame_num])  # type: np.ndarray
+        self.perspective_flags = np.ones(frame_num, "bool")  # type: np.ndarray
 
 
 class VmdBoneData(VmdDataBase):
@@ -323,8 +337,8 @@ class VmdBoneData(VmdDataBase):
             self.allocate(frame_num)
 
     def allocate(self, frame_num):
-        self.frame_ids = np.zeros(frame_num, dtype="int")
-        self.positions = np.zeros([frame_num, 3])
+        self.frame_ids = np.zeros(frame_num, dtype="int")  # type: np.ndarray | list
+        self.positions = np.zeros([frame_num, 3])  # type: np.ndarray | list
         self.orientations = self._gen_default_quaternion(frame_num)
         self.curve_x = self._gen_default_curve(frame_num)
         self.curve_y = self._gen_default_curve(frame_num)
