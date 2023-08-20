@@ -13,13 +13,13 @@ The camera motion processed by this tool is applied in MMD videos belows
 * 【Azur Lane MMD】Formidable - Otome Dissection (乙女解剖)【Camera DL】【1080p】  
   https://youtu.be/jAezBPdKSWU?t=70  
 
-  [![](https://markdown-videos.deta.dev/youtube/jAezBPdKSWU)](https://youtu.be/jAezBPdKSWU?t=70)
+  [![](https://markdown-videos-api.jorgenkh.no/youtube/jAezBPdKSWU)](https://youtu.be/jAezBPdKSWU?t=70)
 
   > tracing groove (グルーブ) bone.
 
 * 【MMD】ラヴィット / Loveit - カルも式初音ミク【Camera DL】【1080p】  
   https://youtu.be/-bQIrVkLFJw?t=6  
-  [![](https://markdown-videos.deta.dev/youtube/-bQIrVkLFJw)](https://youtu.be/-bQIrVkLFJw?t=6)
+  [![](https://markdown-videos-api.jorgenkh.no/youtube/-bQIrVkLFJw)](https://youtu.be/-bQIrVkLFJw?t=6)
 
   > tracing head (頭) bone.
 

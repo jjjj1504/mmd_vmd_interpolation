@@ -5,6 +5,7 @@ class Transform(object):
 
     @staticmethod
     def product_quaternion(ql, qr):
+        # type: (np.ndarray, np.ndarray) -> np.ndarray
         qlx, qly, qlz, qlw = ql
         qrx, qry, qrz, qrw = qr
         q = np.stack([
@@ -17,19 +18,22 @@ class Transform(object):
 
     @staticmethod
     def inverse_quaternion(q):
-        q_inv = np.empty_like(q)
+        # type: (np.ndarray) -> np.ndarray
+        q_inv = np.empty_like(q)  # type: np.ndarray
         q_inv[:3] = -q[:3]
         q_inv[3] = q[3]
         return q_inv
 
     @classmethod
     def divide_left_quaternion(cls, ql, qr):
+        # type: (np.ndarray, np.ndarray) -> np.ndarray
         ql_inv = cls.inverse_quaternion(ql)
         q = cls.product_quaternion(ql_inv, qr)
         return q
 
     @staticmethod
     def decompose_quaternion(q):
+        # type: (np.ndarray) -> tuple[np.ndarray, float]
         costh2 = q[3]
         sinth2 = np.sqrt(q[0]**2 + q[1]**2 + q[2]**2)
         angle = 2 * np.arctan2(sinth2, costh2)
@@ -41,6 +45,7 @@ class Transform(object):
 
     @staticmethod
     def form_quaternion(axis, angle):
+        # type: (np.ndarray, float) -> np.ndarray
         costh2 = np.cos(angle/2.)
         sinth2 = np.sin(angle/2.)
         quaternion = np.stack(
@@ -50,12 +55,14 @@ class Transform(object):
 
     @classmethod
     def transform_pose(cls, q1, t1, q2, t2):
+        # type: (np.ndarray, np.ndarray, np.ndarray, np.ndarray) -> tuple[np.ndarray, np.ndarray]
         q12 = cls.product_quaternion(q1, q2)
         t12 = cls.rotate_vector(q1, t2) + t1
         return q12, t12
 
     @classmethod
     def rotate_vector(cls, q, v):
+        # type: (np.ndarray, np.ndarray) -> np.ndarray
         v4 = cls.extend_vector_to_quaternion(v)
         qi = cls.inverse_quaternion(q)
         qv4 = cls.product_quaternion(q, v4)
@@ -64,12 +71,14 @@ class Transform(object):
 
     @staticmethod
     def extend_vector_to_quaternion(v):
+        # type: (np.ndarray) -> np.ndarray
         zero_append = np.zeros_like(v[0])
         v4 = np.stack([v[0], v[1], v[2], zero_append])
         return v4
 
     @classmethod
     def convert_mmd_euler_angles_to_quaternion(cls, mmd_euler_angles):
+        # type: (np.ndarray) -> np.ndarray
         mmd_x_pitch, mmd_y_yaw, mmd_z_roll = mmd_euler_angles
         q_x_pitch = cls.form_quaternion(
             np.array([[-1.,  0.,  0.]]).T, mmd_x_pitch,  # attention: in reverse

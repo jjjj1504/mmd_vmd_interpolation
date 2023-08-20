@@ -10,7 +10,8 @@ class BonesTree(object):
 
     @classmethod
     def get(cls, bones_list):
-        bones_tree = {}
+        # type: (list[tuple[str, str, np.ndarray]]) -> dict[str, dict[str, str | np.ndarray]]
+        bones_tree = {}  # type: dict[str, dict[str, str | np.ndarray]]
         # assign basic attribute
         for bone_name, parent_name, position in bones_list:
             bones_tree[bone_name] = {
@@ -29,6 +30,7 @@ class BonesTree(object):
 class BonesPoseCalculator(object):
 
     def __init__(self, bones_data, bone_tree={}):
+        # type: (dict[str, VmdBoneData], dict[str, dict[str, str | np.ndarray]]) -> None
         self._bones_data = bones_data  # type: dict[str, VmdBoneData]
         self._bones_tree = bone_tree
         self._full_frame_num = max([
@@ -48,6 +50,7 @@ class BonesPoseCalculator(object):
         return self._bones_full_interp
 
     def _get_full_interp_bone(self, bone_name):
+        # type: (str) -> VmdBoneData
         if bone_name in self._bones_full_interp:
             return self._bones_full_interp[bone_name]
         bone_data = self._bones_data[bone_name]
@@ -98,6 +101,7 @@ class BonesPoseCalculator(object):
         return self._bones_full_pose
 
     def _get_full_pose_bone(self, bone_name):
+        # type: (str) -> VmdBoneData
         # get parent bone
         if bone_name in self._bones_full_pose:
             return self._bones_full_pose[bone_name]
@@ -130,6 +134,7 @@ class BonesPoseCalculator(object):
         return self._bones_full_pose[bone_name]
 
     def get_lpf_full_positions_bones(self, time_delay):
+        # type: (float) -> dict[str, np.ndarray]
         if self._bones_full_position_lpf:
             return self._bones_full_position_lpf
         # loop to apply low-pass filter to position for each bone
@@ -138,6 +143,7 @@ class BonesPoseCalculator(object):
         return self._bones_full_position_lpf
 
     def _get_lpf_full_positions_bone(self, bone_name, time_delay):
+        # type: (str, float) -> np.ndarray
         if bone_name in self._bones_full_position_lpf:
             return self._bones_full_position_lpf[bone_name]
         bone_full_pose = self._get_full_pose_bone(bone_name)
@@ -149,11 +155,13 @@ class BonesPoseCalculator(object):
 
     @staticmethod
     def _apply_lpf(x, time_delay):
+        # type: (np.ndarray, float) -> np.ndarray
         if time_delay == 0:
             return x
         else:
             def lpf_by_for_loop(x, lag_ratio, update_ratio):
-                y = np.empty_like(x)
+                # type: (np.ndarray, float, float) -> np.ndarray
+                y = np.empty_like(x)  # type: np.ndarray
                 y[0] = x[0]
                 for i in range(1, len(x)):
                     # 1-st order low-pass filter with backward difference approach
@@ -161,6 +169,7 @@ class BonesPoseCalculator(object):
                 return y
 
             def lpf_by_scipy_lfilter(x, lag_ratio, update_ratio):
+                # type: (np.ndarray, float, float) -> np.ndarray
                 # apply digital filter
                 b = np.array([update_ratio])
                 a = np.array([1.0, -lag_ratio])
